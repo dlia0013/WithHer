@@ -4,20 +4,29 @@ import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container">
+      <router-link class="navbar-brand fw-bold" to="/learn">Women’s Health</router-link>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
+      <div id="mainNav" class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><router-link class="nav-link" to="/learn">Learn & Explore</router-link></li>
+          <li class="nav-item"><router-link class="nav-link" to="/care">Find Care</router-link></li>
+          <li class="nav-item"><router-link class="nav-link" to="/community">Community & Support</router-link></li>
+          <li class="nav-item"><router-link class="nav-link" to="/hub">My Health Hub</router-link></li>
+          <li class="nav-item"><router-link class="nav-link" to="/about">About Us</router-link></li>
+        </ul>
+      </div>
     </div>
-  </header>
+  </nav>
 
-  <RouterView />
+  <main class="container py-4">
+    <router-view />
+  </main>
 </template>
 
 <style scoped>
