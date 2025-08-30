@@ -4,8 +4,8 @@ import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
-  <nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <div class="container-fluid">
       <router-link class="navbar-brand fw-bold" to="/learn">Women’s Health</router-link>
 
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
@@ -24,7 +24,7 @@ import HelloWorld from './components/HelloWorld.vue'
     </div>
   </nav>
 
-  <main class="container py-4">
+  <main class="container py-4" style="margin-top: 80px;">
     <router-view />
   </main>
 </template>
