@@ -72,6 +72,10 @@ nav a {
 nav a:first-of-type {
   border: 0;
 }
+.navbar .nav-link.active {
+  font-weight: 600;
+  text-decoration: underline;
+}
 
 @media (min-width: 1024px) {
   header {
