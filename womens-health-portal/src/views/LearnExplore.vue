@@ -48,3 +48,38 @@ const tips = ref([
     tag: 'Wellbeing' }
 ])
 </script>
+
+<style>
+.lx-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.lx-card {
+  border: 1px solid rgba(0,0,0,.06);
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.lx-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  border-color: rgba(0,0,0,.12);
+}
+
+.lx-badge {
+  background: #f1f3f5;
+  color: #495057;
+  font-weight: 600;
+}
+
+.lx-line-2 {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.lx-line-3 {
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+@media (max-width: 576px) {
+  .lx-container { padding: 12px; }
+}
+</style>
