@@ -8,9 +8,17 @@ import HelloWorld from './components/HelloWorld.vue'
     <div class="container-fluid">
       <router-link class="navbar-brand fw-bold" to="/learn">Women’s Health</router-link>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+      <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#mainNav"
+          aria-controls="mainNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
       <div id="mainNav" class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
