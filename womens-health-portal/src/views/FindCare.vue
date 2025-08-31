@@ -1,110 +1,113 @@
 <template>
-  <section>
-    <h1 class="h3 mb-4">Find Care</h1>
+  <div class="page">
+    <section>
+      <h1 class="h3 mb-4">Find Care</h1>
 
-    <!-- user preferences form -->
-    <form novalidate @submit.prevent="onSubmit" class="row g-3">
-      <div class="col-md-6">
-        <label class="form-label" for="name">Full name</label>
-        <input
-          id="name"
-          v-model.trim="form.name"
-          :class="['form-control', invalid.name && 'is-invalid']"
-          type="text"
-          placeholder="e.g., Jane Doe"
-          @blur="touch('name')"
-          required
-        />
-        <div class="invalid-feedback">Name is required.</div>
+      <form novalidate @submit.prevent="onSubmit" class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="name">Full name</label>
+          <input
+            id="name"
+            v-model.trim="form.name"
+            :class="['form-control', invalid.name && 'is-invalid']"
+            type="text"
+            placeholder="e.g., Jane Doe"
+            @blur="touch('name')"
+            required
+          />
+          <div class="invalid-feedback">Name is required.</div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label" for="email">Email</label>
+          <input
+            id="email"
+            v-model.trim="form.email"
+            :class="['form-control', invalid.email && 'is-invalid']"
+            type="email"
+            placeholder="e.g., jane@example.com"
+            @blur="touch('email')"
+            required
+          />
+          <div class="invalid-feedback">Please enter a valid email.</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="postcode">Postcode (AU)</label>
+          <input
+            id="postcode"
+            v-model.trim="form.postcode"
+            :class="['form-control', invalid.postcode && 'is-invalid']"
+            type="text"
+            inputmode="numeric"
+            maxlength="4"
+            placeholder="e.g., 3000"
+            @input="digitsOnly('postcode')"
+            @blur="touch('postcode')"
+            required
+          />
+          <div class="invalid-feedback">Postcode must be 4 digits.</div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="type">Appointment type</label>
+          <select
+            id="type"
+            v-model="form.type"
+            :class="['form-select', invalid.type && 'is-invalid']"
+            @blur="touch('type')"
+            required
+          >
+            <option value="">Select…</option>
+            <option value="gp">General Practitioner</option>
+            <option value="obgyn">OB-GYN</option>
+            <option value="mental">Mental Health</option>
+            <option value="physio">Physiotherapy</option>
+          </select>
+          <div class="invalid-feedback">Please choose a type.</div>
+        </div>
+
+        <div class="col-12 d-flex gap-2">
+          <button class="btn btn-primary" type="submit">Save preferences</button>
+          <button class="btn btn-outline-secondary" type="button" @click="resetForm">Reset</button>
+        </div>
+      </form>
+
+      <div v-if="saved" class="alert alert-success mt-4" role="status">
+        Preferences saved. Showing providers near <strong>{{ form.postcode }}</strong> for
+        <strong>{{ typeLabel(form.type) }}</strong>.
       </div>
 
-      <div class="col-md-6">
-        <label class="form-label" for="email">Email</label>
-        <input
-          id="email"
-          v-model.trim="form.email"
-          :class="['form-control', invalid.email && 'is-invalid']"
-          type="email"
-          placeholder="e.g., jane@example.com"
-          @blur="touch('email')"
-          required
-        />
-        <div class="invalid-feedback">Please enter a valid email.</div>
-      </div>
+      <hr class="my-4" />
 
-      <div class="col-md-4">
-        <label class="form-label" for="postcode">Postcode (AU)</label>
-        <input
-          id="postcode"
-          v-model.trim="form.postcode"
-          :class="['form-control', invalid.postcode && 'is-invalid']"
-          type="text"
-          inputmode="numeric"
-          maxlength="4"
-          placeholder="e.g., 3000"
-          @input="digitsOnly('postcode')"
-          @blur="touch('postcode')"
-          required
-        />
-        <div class="invalid-feedback">Postcode must be 4 digits.</div>
-      </div>
+      <h2 class="h5 mb-3">Providers</h2>
+      <p class="text-muted mb-3">
+        {{ filteredProviders.length }} result(s)
+        <span v-if="form.postcode"> • Postcode starts with {{ form.postcode.slice(0, 2) }}</span>
+        <span v-if="form.type"> • Type: {{ typeLabel(form.type) }}</span>
+      </p>
 
-      <div class="col-md-4">
-        <label class="form-label" for="type">Appointment type</label>
-        <select
-          id="type"
-          v-model="form.type"
-          :class="['form-select', invalid.type && 'is-invalid']"
-          @blur="touch('type')"
-          required
-        >
-          <option value="">Select…</option>
-          <option value="gp">General Practitioner</option>
-          <option value="obgyn">OB-GYN</option>
-          <option value="mental">Mental Health</option>
-          <option value="physio">Physiotherapy</option>
-        </select>
-        <div class="invalid-feedback">Please choose a type.</div>
-      </div>
-
-      <div class="col-12 d-flex gap-2">
-        <button class="btn btn-primary" type="submit">Save preferences</button>
-        <button class="btn btn-outline-secondary" type="button" @click="resetForm">Reset</button>
-      </div>
-    </form>
-
-    <div v-if="saved" class="alert alert-success mt-4" role="status">
-      Preferences saved. Showing providers near <strong>{{ form.postcode }}</strong> for
-      <strong>{{ typeLabel(form.type) }}</strong>.
-    </div>
-
-    <hr class="my-4" />
-    <h2 class="h5 mb-3">Providers</h2>
-    <p class="text-muted mb-3">
-      {{ filteredProviders.length }} result(s)
-      <span v-if="form.postcode"> • Postcode starts with {{ form.postcode.slice(0, 2) }}</span>
-      <span v-if="form.type"> • Type: {{ typeLabel(form.type) }}</span>
-    </p>
-
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
-      <div class="col" v-for="p in filteredProviders" :key="p.id">
-        <div class="card h-100">
-          <div class="card-body">
-            <h3 class="card-title h6 mb-1">{{ p.name }}</h3>
-            <p class="card-text mb-2">{{ p.address }}</p>
-            <span class="badge bg-secondary me-2">{{ typeLabel(p.type) }}</span>
-            <span class="badge bg-light text-dark">Postcode: {{ p.postcode }}</span>
-          </div>
-          <div class="card-footer bg-transparent">
-            <button class="btn btn-sm btn-outline-primary" type="button">View details</button>
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        <div class="col" v-for="p in filteredProviders" :key="p.id">
+          <div class="card h-100">
+            <div class="card-body">
+              <h3 class="card-title h6 mb-1">{{ p.name }}</h3>
+              <p class="card-text mb-2">{{ p.address }}</p>
+              <span class="badge bg-secondary me-2">{{ typeLabel(p.type) }}</span>
+              <span class="badge bg-light text-dark">Postcode: {{ p.postcode }}</span>
+            </div>
+            <div class="card-footer bg-transparent">
+              <button class="btn btn-sm btn-outline-primary" type="button">View details</button>
+            </div>
           </div>
         </div>
+
+        <div v-if="filteredProviders.length === 0" class="col">
+          <div class="alert alert-warning">No providers match your filters yet.</div>
+        </div>
       </div>
-      <div v-if="filteredProviders.length === 0" class="col">
-        <div class="alert alert-warning">No providers match your filters yet.</div>
-      </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </template>
 
 <script setup>
@@ -116,8 +119,9 @@ const form = reactive({
   postcode: '',
   type: ''
 })
-const touched = reactive({})        
-const invalid = reactive({})        
+
+const touched = reactive({})
+const invalid = reactive({})
 const saved = ref(false)
 
 const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
@@ -143,7 +147,10 @@ function digitsOnly(key) {
 }
 
 function validateAll() {
-  ;['name', 'email', 'postcode', 'type'].forEach((k) => { touched[k] = true; validateField(k) })
+  ;['name', 'email', 'postcode', 'type'].forEach((k) => {
+    touched[k] = true
+    validateField(k)
+  })
   return !Object.values(invalid).some(Boolean)
 }
 
@@ -159,8 +166,8 @@ function resetForm() {
   form.email = ''
   form.postcode = ''
   form.type = ''
-  Object.keys(touched).forEach(k => delete touched[k])
-  Object.keys(invalid).forEach(k => delete invalid[k])
+  Object.keys(touched).forEach((k) => delete touched[k])
+  Object.keys(invalid).forEach((k) => delete invalid[k])
   saved.value = false
 }
 
@@ -184,7 +191,7 @@ const providers = ref([
 
 const filteredProviders = computed(() => {
   const pcPrefix = form.postcode?.slice(0, 2)
-  return providers.value.filter(p => {
+  return providers.value.filter((p) => {
     const byType = form.type ? p.type === form.type : true
     const byPC = pcPrefix ? p.postcode.startsWith(pcPrefix) : true
     return byType && byPC
@@ -192,6 +199,13 @@ const filteredProviders = computed(() => {
 })
 
 function typeLabel(v) {
-  return ({ gp: 'General Practitioner', obgyn: 'OB-GYN', mental: 'Mental Health', physio: 'Physiotherapy' }[v] || 'Unknown')
+  return (
+    {
+      gp: 'General Practitioner',
+      obgyn: 'OB-GYN',
+      mental: 'Mental Health',
+      physio: 'Physiotherapy'
+    }[v] || 'Unknown'
+  )
 }
 </script>
