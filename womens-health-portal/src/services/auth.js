@@ -31,7 +31,6 @@ export async function register({ email, password, name, role }) {
   };
   users.push(user);
   _writeUsers(users);
-  // 默认自动登录
   localStorage.setItem(LS_SESSION_KEY, JSON.stringify({ id: user.id, email: user.email, role: user.role, name: user.name }));
   return user;
 }
