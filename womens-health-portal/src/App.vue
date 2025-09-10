@@ -31,9 +31,7 @@ import { RouterLink, RouterView } from 'vue-router'
     </div>
   </nav>
 
-  <!-- 主体区域：负责居中与留出导航高度 -->
   <main class="main-wrapper">
-    <!-- 统一的页面容器：所有路由页内容都会被包在这里 -->
     <div class="page">
       <RouterView />
     </div>
