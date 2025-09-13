@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 import ProDashboard from '../views/ProDashboard.vue';
 import LoginRegister from '../components/LoginRegister.vue';
+import ProviderDetails from '../views/ProviderDetails.vue';
 import Hub from '../views/MyHealthHub.vue';
 import { isAuthenticated, hasRole } from '../services/auth';
 
@@ -11,7 +12,7 @@ const routes = [
   { path: '/care', component: () => import('../views/FindCare.vue') },
   { path: '/community', component: () => import('../views/CommunitySupport.vue') },
   { path: '/about', component: () => import('../views/AboutUs.vue') },
-
+  { path: '/providers/:id', name: 'provider-details', component: ProviderDetails },
   { path: '/auth', name: 'auth', component: LoginRegister },
   { path: '/hub', name: 'hub', component: Hub, meta: { requiresAuth: true } },
 
