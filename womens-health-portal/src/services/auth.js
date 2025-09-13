@@ -57,3 +57,8 @@ export function getCurrentUser() {
 export function isAuthenticated() {
   return !!getCurrentUser();
 }
+
+export function hasRole(...roles) {
+  const u = getCurrentUser();
+  return !!u && roles.includes(u.role);
+}

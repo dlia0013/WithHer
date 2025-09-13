@@ -39,6 +39,9 @@ function handleLogout() {
           <li class="nav-item" v-else>
             <a class="nav-link" href="#" @click.prevent="handleLogout">Logout</a>
           </li>
+          <li class="nav-item" v-if="current && current.role==='pro'">
+            <RouterLink class="nav-link" to="/pro">Pro Panel</RouterLink>
+          </li>
         </ul>
       </div>
     </div>
