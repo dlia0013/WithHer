@@ -20,10 +20,16 @@ function validateLogin() {
 }
 function validateRegister() {
   errorMsg.value = '';
+  const pw = regForm.value.password;
+  const pwRe = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/; 
+
   if (!regForm.value.name.trim()) { errorMsg.value = 'Name is required'; return false; }
   if (!emailRe.test(regForm.value.email)) { errorMsg.value = 'Invalid email format'; return false; }
-  if (regForm.value.password.length < 6) { errorMsg.value = 'Password must be at least 6 characters'; return false; }
-  if (regForm.value.password !== regForm.value.confirm) { errorMsg.value = 'Passwords do not match'; return false; }
+  if (!pwRe.test(pw)) { 
+    errorMsg.value = 'Password must be ≥8 chars, include letters & numbers'; 
+    return false; 
+  }
+  if (pw !== regForm.value.confirm) { errorMsg.value = 'Passwords do not match'; return false; }
   return true;
 }
 
