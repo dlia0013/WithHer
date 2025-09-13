@@ -1,8 +1,14 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router';
 import { computed } from 'vue';
-import { getCurrentUser } from '@/services/auth';
+import { getCurrentUser, logout } from '@/services/auth'; 
+
 const current = computed(() => getCurrentUser());
+
+function handleLogout() {
+  logout();
+  window.location.href = '/auth'; 
+}
 </script>
 
 <template>
@@ -30,6 +36,9 @@ const current = computed(() => getCurrentUser());
           <li class="nav-item"><RouterLink class="nav-link" to="/hub">My Health Hub</RouterLink></li>
           <li class="nav-item"><RouterLink class="nav-link" to="/about">About Us</RouterLink></li>
           <li class="nav-item" v-if="!current"><a class="nav-link" href="/auth">Login</a></li>
+          <li class="nav-item" v-else>
+            <a class="nav-link" href="#" @click.prevent="handleLogout">Logout</a>
+          </li>
         </ul>
       </div>
     </div>
