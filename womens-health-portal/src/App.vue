@@ -1,5 +1,8 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView } from 'vue-router';
+import { computed } from 'vue';
+import { getCurrentUser } from '@/services/auth';
+const current = computed(() => getCurrentUser());
 </script>
 
 <template>
@@ -26,6 +29,7 @@ import { RouterLink, RouterView } from 'vue-router'
           <li class="nav-item"><RouterLink class="nav-link" to="/community">Community & Support</RouterLink></li>
           <li class="nav-item"><RouterLink class="nav-link" to="/hub">My Health Hub</RouterLink></li>
           <li class="nav-item"><RouterLink class="nav-link" to="/about">About Us</RouterLink></li>
+          <li class="nav-item" v-if="!current"><a class="nav-link" href="/auth">Login</a></li>
         </ul>
       </div>
     </div>

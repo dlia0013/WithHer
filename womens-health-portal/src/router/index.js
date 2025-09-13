@@ -11,6 +11,8 @@ const routes = [
   { path: '/community', component: () => import('../views/CommunitySupport.vue') },
   { path: '/about', component: () => import('../views/AboutUs.vue') },
   { path: '/:pathMatch(.*)*', component: () => import('../views/NotFound.vue') },
+  { path: '/auth', name: 'auth', component: LoginRegister },
+  { path: '/hub', name: 'hub', component: Hub, meta: { requiresAuth: true } },
 ]
 
 const router = createRouter({
