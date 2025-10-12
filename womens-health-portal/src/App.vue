@@ -35,7 +35,7 @@ function handleLogout() {
           <li class="nav-item"><RouterLink class="nav-link" to="/community">Community & Support</RouterLink></li>
           <li class="nav-item"><RouterLink class="nav-link" to="/hub">My Health Hub</RouterLink></li>
           <li class="nav-item"><RouterLink class="nav-link" to="/about">About Us</RouterLink></li>
-          <li class="nav-item" v-if="!current"><a class="nav-link" href="/auth">Login</a></li>
+          <li class="nav-item" v-if="!current"><RouterLink class="nav-link" to="/firebase-login">Login</RouterLink></li>
           <li class="nav-item" v-else>
             <a class="nav-link" href="#" @click.prevent="handleLogout">Logout</a>
           </li>

@@ -19,6 +19,7 @@ const routes = [
   { path: '/pro', name: 'pro', component: ProDashboard, meta: { requiresAuth: true, roles: ['pro'] } },
 
   { path: '/:pathMatch(.*)*', component: () => import('../views/NotFound.vue') },
+  { path:'/firebase-login', name: 'FireLogin', component: () => import('../views/FirebaseSigninView.vue')}
 ];
 
 const router = createRouter({
