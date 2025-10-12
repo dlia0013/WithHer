@@ -1,30 +1,25 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router';
-import { computed } from 'vue';
-import { getCurrentUser, logout } from '@/services/auth'; 
+import { RouterLink, RouterView, useRouter } from 'vue-router'
+import { current } from '@/stores/user'
+import { logout } from '@/services/auth'
 
-const current = computed(() => getCurrentUser());
-
-function handleLogout() {
-  logout();
-  window.location.href = '/auth'; 
+const router = useRouter()
+async function handleLogout () {
+  try {
+    await logout()
+    router.replace('/')  
+  } catch (e) { console.error(e) }
 }
 </script>
 
 <template>
   <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
     <div class="container">
-      <RouterLink class="navbar-brand fw-bold" to="/learn">Women's Health</RouterLink>
+      <RouterLink class="navbar-brand fw-bold" to="/">Women's Health</RouterLink>
 
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#mainNav"
-        aria-controls="mainNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+              data-bs-target="#mainNav" aria-controls="mainNav"
+              aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
@@ -35,12 +30,22 @@ function handleLogout() {
           <li class="nav-item"><RouterLink class="nav-link" to="/community">Community & Support</RouterLink></li>
           <li class="nav-item"><RouterLink class="nav-link" to="/hub">My Health Hub</RouterLink></li>
           <li class="nav-item"><RouterLink class="nav-link" to="/about">About Us</RouterLink></li>
-          <li class="nav-item" v-if="!current"><RouterLink class="nav-link" to="/firebase-login">Login</RouterLink></li>
-          <li class="nav-item" v-else>
-            <a class="nav-link" href="#" @click.prevent="handleLogout">Logout</a>
-          </li>
-          <li class="nav-item" v-if="current && current.role==='pro'">
+
+          <li class="nav-item" v-if="current.role === 'pro'">
             <RouterLink class="nav-link" to="/pro">Pro Panel</RouterLink>
+          </li>
+
+          <li class="nav-item" v-if="!current.user">
+            <RouterLink class="nav-link" to="/firebase-login">Login</RouterLink>
+          </li>
+
+          <li class="nav-item dropdown" v-else>
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              {{ current.user.email || 'Account' }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#" @click.prevent="handleLogout">Logout</a></li>
+            </ul>
           </li>
         </ul>
       </div>
@@ -53,28 +58,3 @@ function handleLogout() {
     </div>
   </main>
 </template>
-
-<!-- App.vue -->
-<style>
-:root { --page-max: 1040px; }
-
-.main-wrapper{
-  margin-top:80px;
-  min-height:calc(100vh - 80px);
-  display:flex; justify-content:center; align-items:flex-start;
-}
-
-.page{
-  width:100%;
-  max-width:var(--page-max);
-  margin-inline:auto;
-  padding-inline:16px;
-  box-sizing:border-box;
-}
-
-@media (max-width:575.98px){ .page{ max-width:100%; padding-inline:12px; } }
-@media (min-width:576px) and (max-width:767.98px){ .page{ max-width:540px; } }
-@media (min-width:768px) and (max-width:991.98px){ .page{ max-width:720px; } }
-@media (min-width:992px) and (max-width:1199.98px){ .page{ max-width:960px; } }
-@media (min-width:1200px){ .page{ max-width:1040px; } }
-</style>
