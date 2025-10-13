@@ -12,14 +12,22 @@ const routes = [
   { path: '/care', component: () => import('../views/FindCare.vue') },
   { path: '/community', component: () => import('../views/CommunitySupport.vue') },
   { path: '/about', component: () => import('../views/AboutUs.vue') },
-  { path: '/providers/:id', name: 'provider-details', component: ProviderDetails },
+  { path: '/providers/:id', name: 'provider-details', component: () => import('@/views/ProviderDetails.vue') },
+  { path: '/providers/:id/book', name: 'BookAppt', component: () => import('@/views/AppointmentBooking.vue'),
+    props: route => ({
+      providerId: route.params.id,
+      doctor: route.query.doctor || '',
+      clinicEmail: route.query.email || ''
+    })
+  },
   { path: '/auth', name: 'auth', component: LoginRegister },
   { path: '/hub', name: 'hub', component: Hub, meta: { requiresAuth: true } },
 
   { path: '/pro', name: 'pro', component: ProDashboard, meta: { requiresAuth: true, roles: ['pro'] } },
 
   { path: '/:pathMatch(.*)*', component: () => import('../views/NotFound.vue') },
-  { path:'/firebase-login', name: 'FireLogin', component: () => import('../views/FirebaseSigninView.vue')}
+  { path:'/firebase-login', name: 'FireLogin', component: () => import('../views/FirebaseSigninView.vue')},
+  { path: '/book', name: 'BookAppointment', component: () => import('@/views/AppointmentBooking.vue')}
 ];
 
 const router = createRouter({

@@ -4,7 +4,6 @@
       <h1 class="h3 mb-4">Find Care</h1>
 
       <form novalidate @submit.prevent="onSubmit" class="row g-3">
-      
         <div class="col-md-6">
           <label class="form-label" for="name">Full name</label>
           <input id="name" v-model.trim="form.name"
@@ -14,7 +13,6 @@
           <div class="invalid-feedback">Name is required.</div>
         </div>
 
-       
         <div class="col-md-6">
           <label class="form-label" for="email">Email</label>
           <input id="email" v-model.trim="form.email"
@@ -35,7 +33,6 @@
           <div class="invalid-feedback">Postcode must be 4 digits.</div>
         </div>
 
-       
         <div class="col-md-4">
           <label class="form-label" for="type">Appointment type</label>
           <select id="type" v-model="form.type"
@@ -80,10 +77,21 @@
               <span class="badge bg-light text-dark me-2">Postcode: {{ p.postcode }}</span>
               <span class="small text-muted">Avg rating: {{ avgFor(p.id) }}</span>
             </div>
-            <div class="card-footer bg-transparent">
-              <RouterLink class="btn btn-sm btn-outline-primary"
-                          :to="{ name: 'provider-details', params: { id: p.id } }">
+
+            <div class="card-footer bg-transparent d-flex gap-2">
+              <RouterLink
+                class="btn btn-sm btn-outline-primary"
+                :to="{ name: 'provider-details', params: { id: p.id } }">
                 View details
+              </RouterLink>
+
+              <RouterLink
+                class="btn btn-sm btn-primary"
+                :to="{
+                  path: `/providers/${p.id}/book`,
+                  query: { doctor: p.name, email: p.email || '' }
+                }">
+                Book appointment
               </RouterLink>
             </div>
           </div>
