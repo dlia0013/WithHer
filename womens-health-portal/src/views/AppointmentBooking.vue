@@ -14,10 +14,14 @@ const props = defineProps({
 const route = useRoute()
 const router = useRouter()
 
+const effectiveProviderId = computed(() => props.providerId || String(route.params.id || ''))
+const effectiveDoctor     = computed(() => props.doctor     || String(route.query.doctor || ''))
+const effectiveClinicEmail= computed(() => props.clinicEmail|| String(route.query.email  || ''))
+
 const form = ref({
   name: '',
   email: '',
-  doctor: props.doctor || '',
+  doctor: effectiveDoctor.value || '',
   date: '',
   time: '',
   notes: ''
@@ -40,6 +44,27 @@ const errors = computed(() => {
   return e
 })
 
+function saveAppointmentToLocal () {
+  const appt = {
+    id: (crypto.randomUUID?.() || String(Date.now())),
+    providerId: effectiveProviderId.value,
+    providerName: form.value.doctor || effectiveDoctor.value || 'Unknown',
+    clinicEmail: effectiveClinicEmail.value || 'clinic@example.com',
+    date: form.value.date,
+    time: form.value.time,
+    notes: (form.value.notes || '').trim(),
+    status: 'Confirmed',
+    createdAt: Date.now(),
+  }
+  try {
+    const list = JSON.parse(localStorage.getItem('appointments') || '[]')
+    list.push(appt)
+    localStorage.setItem('appointments', JSON.stringify(list))
+  } catch (e) {
+    console.warn('Failed to save appointment to localStorage:', e)
+  }
+}
+
 async function submitBooking () {
   if (Object.keys(errors.value).length) {
     msg.value = '❌ Please fix form errors'
@@ -48,7 +73,6 @@ async function submitBooking () {
   loading.value = true
   msg.value = ''
   try {
-    
     const subjectUser = `Your appointment with ${form.value.doctor} on ${form.value.date} at ${form.value.time}`
     const htmlUser = `
       <p>Hi ${form.value.name},</p>
@@ -67,7 +91,7 @@ async function submitBooking () {
       html: htmlUser
     })
 
-    const clinicTo = props.clinicEmail ? [props.clinicEmail] : ['clinic@example.com']
+    const clinicTo = effectiveClinicEmail.value ? [effectiveClinicEmail.value] : ['clinic@example.com']
     const subjectClinic = `New booking: ${form.value.name} → ${form.value.doctor} (${form.value.date} ${form.value.time})`
     const textClinic =
 `New appointment:
@@ -83,11 +107,11 @@ async function submitBooking () {
       text: textClinic
     })
 
+    saveAppointmentToLocal()
     msg.value = '✅ Appointment submitted and emails sent!'
-
     setTimeout(() => {
-      router.replace({ name: 'ProviderDetails', params: { id: props.providerId } })
-    }, 1200)
+      router.push('/hub')
+    }, 1000)
   } catch (e) {
     console.error(e)
     msg.value = '❌ Failed: ' + (e.response?.data?.message || e.message)
@@ -117,8 +141,7 @@ async function submitBooking () {
 
         <div class="col-md-6">
           <label class="form-label">Provider</label>
-          <input v-model="form.doctor" type="text" class="form-control" :readonly="!!props.doctor" />
-          <!-- 如果你不希望用户改动医生名就 readonly -->
+          <input v-model="form.doctor" type="text" class="form-control" :readonly="!!effectiveDoctor">
         </div>
 
         <div class="col-md-3">

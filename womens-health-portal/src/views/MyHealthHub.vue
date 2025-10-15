@@ -52,19 +52,28 @@
 
       <hr class="my-4" />
       <h2 class="h5 mb-3">Suggestions for you</h2>
-      <ul class="list-group">
-        <li class="list-group-item" v-for="s in suggestions" :key="s.id">
-          {{ s.text }}
-        </li>
+      <ul class="list-group mb-4">
+        <li class="list-group-item" v-for="s in suggestions" :key="s.id">{{ s.text }}</li>
       </ul>
+
+      <!-- ========= My Appointments Table ========= -->
+      <h2 class="h5 mb-3">My Appointments</h2>
+      <AppointmentTable
+        :rows="appointments"
+        @cancel="onCancel"
+        @reschedule="onReschedule"
+        @view="onView"
+      />
     </div>
   </section>
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
+import AppointmentTable from '@/components/AppointmentTable.vue'
 
 const prefs = ref(null)
+const appointments = ref([])
 
 onMounted(() => {
   try {
@@ -73,7 +82,23 @@ onMounted(() => {
   } catch {
     prefs.value = null
   }
+  loadAppts()
+  window.addEventListener('storage', onStorage)
 })
+onUnmounted(() => window.removeEventListener('storage', onStorage))
+
+function onStorage(e) {
+  if (e.key === 'appointments') loadAppts()
+}
+
+function loadAppts() {
+  const raw = localStorage.getItem('appointments') || '[]'
+  try {
+    appointments.value = JSON.parse(raw)
+  } catch {
+    appointments.value = []
+  }
+}
 
 const displayName = computed(() => {
   const name = prefs.value?.name?.trim()
@@ -82,7 +107,12 @@ const displayName = computed(() => {
 })
 
 function typeLabel(v) {
-  return ({ gp: 'General Practitioner', obgyn: 'OB-GYN', mental: 'Mental Health', physio: 'Physiotherapy' }[v] || 'Unknown')
+  return ({
+    gp: 'General Practitioner',
+    obgyn: 'OB-GYN',
+    mental: 'Mental Health',
+    physio: 'Physiotherapy'
+  }[v] || 'Unknown')
 }
 
 function clearPrefs() {
@@ -122,4 +152,21 @@ const suggestions = computed(() => {
     `Keep your email current for future reminders.`
   ]).map((text, i) => ({ id: i + 1, text }))
 })
+
+function onCancel(row) {
+  if (!confirm(`Cancel this appointment with "${row.providerName}" on ${row.date} ${row.time}?`)) return
+  appointments.value = appointments.value.map(r => r.id === row.id ? { ...r, status: 'Cancelled' } : r)
+  localStorage.setItem('appointments', JSON.stringify(appointments.value))
+}
+
+function onReschedule(row) {
+  const url = `/providers/${encodeURIComponent(row.providerId)}/book?doctor=${encodeURIComponent(row.providerName)}&email=${encodeURIComponent(row.clinicEmail || '')}`
+  window.location.href = url
+}
+
+function onView(row) {
+  alert(
+    `Provider: ${row.providerName}\nDate: ${row.date} ${row.time}\nStatus: ${row.status}\nNotes: ${row.notes || '-'}`
+  )
+}
 </script>
