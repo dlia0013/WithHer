@@ -1,4 +1,4 @@
-import '../lib/firebase' 
+import '../lib/firebase'
 import {
   getAuth,
   onAuthStateChanged,
@@ -7,12 +7,7 @@ import {
   signOut,
   updateProfile,
 } from 'firebase/auth'
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-} from 'firebase/firestore'
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore'
 
 const auth = getAuth()
 const db = getFirestore()
@@ -20,6 +15,13 @@ const db = getFirestore()
 let _currentUser = null
 let _initialized = false
 let _readyOnce
+const _subscribers = new Set()
+
+function _notify() {
+  for (const cb of _subscribers) {
+    try { cb(_currentUser) } catch {}
+  }
+}
 
 function _ensureAuthWatcher() {
   if (_initialized) return _readyOnce
@@ -38,10 +40,20 @@ function _ensureAuthWatcher() {
       } else {
         _currentUser = null
       }
+      _notify()
       resolve() 
     })
   })
   return _readyOnce
+}
+
+export function ready() {
+  return _ensureAuthWatcher()
+}
+
+export function onAuthChange(cb) {
+  _subscribers.add(cb)
+  return () => _subscribers.delete(cb)
 }
 
 export async function hashPassword(plain) {
@@ -70,6 +82,7 @@ export async function register({ email, password, name, role }) {
     name: userDoc.name,
     role: userDoc.role,
   }
+  _notify()
   return _currentUser
 }
 
@@ -85,22 +98,22 @@ export async function login({ email, password }) {
     name: data.name || cred.user.displayName || 'User',
     role: data.role || 'user',
   }
+  _notify()
   return _currentUser
 }
 
 export async function logout() {
   await signOut(auth)
   _currentUser = null
+  _notify()
 }
 
 export function getCurrentUser() {
   return _currentUser
 }
-
 export function isAuthenticated() {
   return !!_currentUser
 }
-
 export function hasRole(...roles) {
   return !!_currentUser && roles.includes(_currentUser.role)
 }

@@ -1,72 +1,78 @@
 <script setup>
-import { ref } from 'vue';
-import { login, register } from '@/services/auth';
+import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { login, register } from '@/services/auth'
 
-const mode = ref('login'); // 'login' | 'register'
-const loading = ref(false);
-const errorMsg = ref('');
-const successMsg = ref('');
+const route = useRoute()
+const router = useRouter()
 
-const loginForm = ref({ email: '', password: '' });
-const regForm = ref({ name: '', email: '', password: '', confirm: '', role: 'user' });
+const mode = ref('login') // 'login' | 'register'
+const loading = ref(false)
+const errorMsg = ref('')
+const successMsg = ref('')
 
-const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const strongPwRe = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
+const loginForm = ref({ email: '', password: '' })
+const regForm   = ref({ name: '', email: '', password: '', confirm: '', role: 'user' })
 
-function validateLogin() {
-  errorMsg.value = '';
-  if (!emailRe.test(loginForm.value.email)) {
-    errorMsg.value = 'Invalid email format'; return false;
-  }
-  if (!strongPwRe.test(loginForm.value.password)) {
-    errorMsg.value = 'Password must be ≥8 chars and include letters & numbers'; return false;
-  }
-  return true;
+const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const strongPwRe = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/
+
+function validateLogin () {
+  errorMsg.value = ''
+  if (!emailRe.test(loginForm.value.email)) { errorMsg.value = 'Invalid email format'; return false }
+  if (!strongPwRe.test(loginForm.value.password)) { errorMsg.value = 'Password must be ≥8 chars and include letters & numbers'; return false }
+  return true
 }
 
-function validateRegister() {
-  errorMsg.value = '';
-  const pw = regForm.value.password;
-
-  if (!regForm.value.name.trim()) { errorMsg.value = 'Name is required'; return false; }
-  if (!emailRe.test(regForm.value.email)) { errorMsg.value = 'Invalid email format'; return false; }
-  if (!strongPwRe.test(pw)) {
-    errorMsg.value = 'Password must be ≥8 chars, include letters & numbers'; return false;
-  }
-  if (pw !== regForm.value.confirm) { errorMsg.value = 'Passwords do not match'; return false; }
-  return true;
+function validateRegister () {
+  errorMsg.value = ''
+  const pw = regForm.value.password
+  if (!regForm.value.name.trim()) { errorMsg.value = 'Name is required'; return false }
+  if (!emailRe.test(regForm.value.email)) { errorMsg.value = 'Invalid email format'; return false }
+  if (!strongPwRe.test(pw)) { errorMsg.value = 'Password must be ≥8 chars, include letters & numbers'; return false }
+  if (pw !== regForm.value.confirm) { errorMsg.value = 'Passwords do not match'; return false }
+  return true
 }
 
-async function onLogin() {
-  if (!validateLogin()) return;
-  loading.value = true; errorMsg.value = ''; successMsg.value = '';
+function goAfterAuth () {
+  const target =
+    (typeof route.query.redirect === 'string' && route.query.redirect)
+      ? route.query.redirect
+      : '/hub'
+  router.replace(target)
+}
+
+async function onLogin () {
+  if (!validateLogin()) return
+  loading.value = true; errorMsg.value = ''; successMsg.value = ''
   try {
-    await login(loginForm.value);
-    successMsg.value = 'Login successful. Redirecting...';
-    setTimeout(() => { window.location.href = '/hub'; }, 600);
+    await login(loginForm.value)
+    successMsg.value = 'Login successful. Redirecting...'
+    setTimeout(goAfterAuth, 500)
   } catch (e) {
-    errorMsg.value = e.message || 'Login failed';
+    // 纯 JS：不要用 "as any"；安全取 message
+    errorMsg.value = (e && e.message) ? e.message : 'Login failed'
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 
-async function onRegister() {
-  if (!validateRegister()) return;
-  loading.value = true; errorMsg.value = ''; successMsg.value = '';
+async function onRegister () {
+  if (!validateRegister()) return
+  loading.value = true; errorMsg.value = ''; successMsg.value = ''
   try {
     await register({
       name: regForm.value.name,
       email: regForm.value.email,
       password: regForm.value.password,
-      role: regForm.value.role // 'user' or 'pro'
-    });
-    successMsg.value = 'Registered and signed in. Redirecting...';
-    setTimeout(() => { window.location.href = '/hub'; }, 600);
+      role: regForm.value.role
+    })
+    successMsg.value = 'Registered and signed in. Redirecting...'
+    setTimeout(goAfterAuth, 500)
   } catch (e) {
-    errorMsg.value = e.message || 'Register failed';
+    errorMsg.value = (e && e.message) ? e.message : 'Register failed'
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 </script>
