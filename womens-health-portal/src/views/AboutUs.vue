@@ -31,17 +31,10 @@
         </p>
         <ul>
           <li><strong>Leticia Liao</strong> — Front-End & Integration Developer</li>
-          <li><strong>Zirui Hu</strong> — UX/UI Design</li>
-          <li><strong>Sanjana</strong> — Visual Design & Research</li>
-          <li><strong>Terry</strong> — Back-End & Firebase Cloud Functions</li>
+          <li><strong>Duanchu Liao</strong> — UX/UI Design</li>
+          <li><strong>Liao Duanchu</strong> — Visual Design & Research</li>
+          <li><strong>Letty Liao</strong> — Back-End & Firebase Cloud Functions</li>
         </ul>
-
-        <h2 class="h5 mt-4">Technology Stack</h2>
-        <p>
-          The platform is built with <strong>Vue 3</strong>, <strong>Vite</strong>, and <strong>Firebase</strong>,
-          using <strong>Cloud Functions</strong> (SendGrid integration) for appointment confirmation emails,
-          and deployed on <strong>Firebase Hosting</strong> for global accessibility.
-        </p>
 
         <div class="alert alert-light border mt-4">
           <p class="mb-1"><strong>Disclaimer:</strong></p>
