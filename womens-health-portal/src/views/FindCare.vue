@@ -6,37 +6,59 @@
       <form novalidate @submit.prevent="onSubmit" class="row g-3">
         <div class="col-md-6">
           <label class="form-label" for="name">Full name</label>
-          <input id="name" v-model.trim="form.name"
-                 :class="['form-control', invalid.name && 'is-invalid']"
-                 type="text" placeholder="e.g., Jane Doe"
-                 @blur="touch('name')" required />
+          <input
+            id="name"
+            v-model.trim="form.name"
+            :class="['form-control', invalid.name && 'is-invalid']"
+            type="text"
+            placeholder="e.g., Jane Doe"
+            @blur="touch('name')"
+            required
+          />
           <div class="invalid-feedback">Name is required.</div>
         </div>
 
         <div class="col-md-6">
           <label class="form-label" for="email">Email</label>
-          <input id="email" v-model.trim="form.email"
-                 :class="['form-control', invalid.email && 'is-invalid']"
-                 type="email" placeholder="e.g., jane@example.com"
-                 @blur="touch('email')" required autocomplete="email" />
+          <input
+            id="email"
+            v-model.trim="form.email"
+            :class="['form-control', invalid.email && 'is-invalid']"
+            type="email"
+            placeholder="e.g., jane@example.com"
+            @blur="touch('email')"
+            required
+            autocomplete="email"
+          />
           <div class="invalid-feedback">Please enter a valid email.</div>
         </div>
 
         <div class="col-md-4">
           <label class="form-label" for="postcode">Postcode (AU)</label>
-          <input id="postcode" v-model.trim="form.postcode"
-                 :class="['form-control', invalid.postcode && 'is-invalid']"
-                 type="text" inputmode="numeric" maxlength="4"
-                 placeholder="e.g., 3000"
-                 @input="digitsOnly('postcode')" @blur="touch('postcode')" required />
+          <input
+            id="postcode"
+            v-model.trim="form.postcode"
+            :class="['form-control', invalid.postcode && 'is-invalid']"
+            type="text"
+            inputmode="numeric"
+            maxlength="4"
+            placeholder="e.g., 3000"
+            @input="digitsOnly('postcode')"
+            @blur="touch('postcode')"
+            required
+          />
           <div class="invalid-feedback">Postcode must be 4 digits.</div>
         </div>
 
         <div class="col-md-4">
           <label class="form-label" for="type">Appointment type</label>
-          <select id="type" v-model="form.type"
-                  :class="['form-select', invalid.type && 'is-invalid']"
-                  @blur="touch('type')" required>
+          <select
+            id="type"
+            v-model="form.type"
+            :class="['form-select', invalid.type && 'is-invalid']"
+            @blur="touch('type')"
+            required
+          >
             <option value="">Select…</option>
             <option value="gp">General Practitioner</option>
             <option value="obgyn">OB-GYN</option>
@@ -65,12 +87,19 @@
         <span v-if="form.type"> • Type: {{ typeLabel(form.type) }}</span>
       </p>
 
-     
-      <ProviderTable
-        :items="filteredProviders"
-        :get-avg="avgFor"
-        :initial-filters="{ postcodePrefix: form.postcode.slice(0,2), type: form.type }"
-      />
+      <!-- Map + Table -->
+      <div class="row g-4 align-items-start">
+        <div class="col-lg-6">
+          <ProviderMap :rows="rowsForMap" @select="onMapSelect" />
+        </div>
+        <div class="col-lg-6">
+          <ProviderTable
+            :items="filteredProviders"
+            :get-avg="avgFor"
+            :initial-filters="{ postcodePrefix: form.postcode.slice(0,2), type: form.type }"
+          />
+        </div>
+      </div>
     </section>
   </div>
 </template>
@@ -81,6 +110,7 @@ import { useRouter } from 'vue-router'
 import { providers } from '@/data/providers'
 import { getAverage } from '@/services/ratings'
 import ProviderTable from '@/components/ProviderTable.vue'
+import ProviderMap from '@/components/ProviderMap.vue'
 
 const router = useRouter()
 
@@ -125,7 +155,8 @@ function resetForm() {
 
 onMounted(() => {
   const raw = localStorage.getItem('carePrefs')
-  if (raw) { try { Object.assign(form, JSON.parse(raw)) } catch {}
+  if (raw) {
+    try { Object.assign(form, JSON.parse(raw)) } catch {}
   }
 })
 
@@ -138,10 +169,53 @@ const filteredProviders = computed(() => {
   })
 })
 
+/** --- Map rows: normalize coords and fallback to postcode centers --- */
+const POSTCODE_CENTER = {
+  '3000': [144.9631, -37.8136], // Melbourne CBD
+  '3002': [144.9842, -37.8125], // East Melbourne
+  '3020': [144.8320, -37.7830], // Sunshine
+  '3024': [144.7008, -37.8098], // Truganina
+  '3053': [144.9660, -37.7980], // Carlton
+  '3072': [145.0160, -37.7390], // Preston
+  '3121': [145.0050, -37.8280], // Richmond
+  '3145': [145.0520, -37.8770], // Malvern East
+  '3150': [145.1650, -37.8780], // Glen Waverley
+  '3186': [144.9930, -37.9030], // Brighton
+}
+
+function ensureCoords(p) {
+  // prefer p.coords: [lng, lat]
+  if (Array.isArray(p.coords) && p.coords.length === 2) {
+    const lng = Number(p.coords[0]); const lat = Number(p.coords[1])
+    if (Number.isFinite(lng) && Number.isFinite(lat)) return [lng, lat]
+  }
+  // support p.lng / p.lat
+  if (Number.isFinite(Number(p.lng)) && Number.isFinite(Number(p.lat))) {
+    return [Number(p.lng), Number(p.lat)]
+  }
+  // fallback to postcode center
+  if (p.postcode && POSTCODE_CENTER[p.postcode]) return POSTCODE_CENTER[p.postcode]
+  return null
+}
+
+const rowsForMap = computed(() =>
+  filteredProviders.value
+    .map(p => {
+      const coords = ensureCoords(p)
+      return coords ? { ...p, coords } : null
+    })
+    .filter(Boolean)
+)
+/** ------------------------------------------------------------------- */
+
 function typeLabel(v) {
   return { gp:'General Practitioner', obgyn:'OB-GYN', mental:'Mental Health', physio:'Physiotherapy' }[v] || 'Unknown'
 }
 function avgFor(id) { return getAverage(id) || 0 }
+
+function onMapSelect(id) {
+  router.push({ name: 'provider-details', params: { id } })
+}
 
 function goBook(p) {
   router.push({

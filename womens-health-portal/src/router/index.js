@@ -29,6 +29,7 @@ const routes = [
   { path: '/book', name: 'BookAppointment', component: () => import('@/views/AppointmentBooking.vue') },
   { path: '/firebase-login', name: 'FireLogin', component: () => import('@/views/FirebaseSigninView.vue') },
   { path: '/:pathMatch(.*)*', component: () => import('@/views/NotFound.vue') },
+  { path: '/map', name: 'map', component: () => import('@/views/NearbyCareMap.vue') },
 ]
 
 const router = createRouter({
