@@ -3,7 +3,7 @@ import HomeView from '@/views/HomeView.vue'
 import ProDashboard from '@/views/ProDashboard.vue'
 import LoginRegister from '@/components/LoginRegister.vue'
 import Hub from '@/views/MyHealthHub.vue'
-import { ready, isAuthenticated, hasRole } from '@/services/auth'
+import { ready, isAuthenticated, hasRole } from '../services/auth'
 
 const routes = [
   { path: '/', name: 'home', component: HomeView },
