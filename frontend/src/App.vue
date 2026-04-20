@@ -80,7 +80,7 @@ watch(() => route.fullPath, () => {
             </li>
 
             <li class="nav-item" v-if="!current.user">
-              <RouterLink class="nav-link" to="/firebase-login">Login</RouterLink>
+              <RouterLink class="nav-link" to="/auth">Login</RouterLink>
             </li>
 
             <li class="nav-item dropdown" v-else>
