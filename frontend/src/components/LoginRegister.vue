@@ -151,12 +151,13 @@ async function onRegister() {
           <p class="hint">At least 8 characters, include letters & numbers</p>
         </div>
         <div class="field">
-          <label for="rcpw">Confirm password</label>
+          <label for="rcpw">Type it once more</label>
           <input id="rcpw" type="password" v-model="regForm.confirm" autocomplete="new-password" required />
         </div>
         <button class="btn-main" type="submit" :disabled="loading">
           {{ loading ? "Creating..." : "I'm ready — let's go 🌸"}}
         </button>
+        <p class="switch-hint">Already have an account? <button type="button" @click="switchMode('login')">Sign in</button></p>
       </form>
 
     </div>
@@ -167,11 +168,12 @@ async function onRegister() {
 .page {
   min-height: calc(100vh - 4.5rem);
   display: flex;
-  align-items: center;
   justify-content: center;
   padding: 2rem;
 }
 .card {
+  margin-top: auto;
+  margin-bottom: auto;
   background: #ffffff;
   border-radius: 16px;
   border: 0.5px solid #e8e4e0;
@@ -216,4 +218,7 @@ async function onRegister() {
 }
 .btn-main:hover { background: #0D1F33; }
 .btn-main:disabled { opacity: 0.6; cursor: not-allowed; }
+.switch-hint { text-align: center; font-size: 14px; color: #888780; margin-top: 1rem; }
+.switch-hint button { background: none; border: none; padding: 0; font-size: 14px; color: #1B3A5C; cursor: pointer; font-weight: 500; }
+.switch-hint button:hover { text-decoration: underline; }
 </style>
