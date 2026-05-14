@@ -12,13 +12,12 @@ const route = useRoute()
 const router = useRouter()
 
 const mode = ref('login')
-const registerStep = ref('role')
 const loading = ref(false)
 const errorMsg = ref('')
 const successMsg = ref('')
 
 const loginForm = ref({ email: '', password: '' })
-const regForm = ref({ name: '', email: '', password: '', confirm: '', role: 'user', title: '' })
+const regForm = ref({ name: '', email: '', password: '', confirm: '' })
 
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const strongPwRe = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/
@@ -49,11 +48,6 @@ function switchMode(m) {
   mode.value = m
   errorMsg.value = ''
   successMsg.value = ''
-  registerStep.value = 'role'
-}
-
-function selectRole(role) {
-  regForm.value.role = role
 }
 
 async function onForgotPassword() {
@@ -74,10 +68,10 @@ async function onLogin() {
   loading.value = true; errorMsg.value = ''; successMsg.value = ''
   try {
     await login(loginForm.value)
-    successMsg.value = 'Login successful. Redirecting...'
+    successMsg.value = "You're in! Taking you there now.."
     setTimeout(goAfterAuth, 500)
   } catch (e) {
-    errorMsg.value = (e && e.message) ? e.message : 'Login failed'
+    errorMsg.value = (e && e.message) ? e.message : "Hmm, something's not right — check your email or password"
   } finally {
     loading.value = false
   }
@@ -87,11 +81,11 @@ async function onRegister() {
   if (!validateRegister()) return
   loading.value = true; errorMsg.value = ''; successMsg.value = ''
   try {
-    await register({ name: regForm.value.name, email: regForm.value.email, password: regForm.value.password, role: regForm.value.role })
-    successMsg.value = 'Account created! Redirecting...'
+    await register({ name: regForm.value.name, email: regForm.value.email, password: regForm.value.password })
+    successMsg.value = "You're in! Taking you there now.."
     setTimeout(goAfterAuth, 500)
   } catch (e) {
-    errorMsg.value = (e && e.message) ? e.message : 'Register failed'
+    errorMsg.value = (e && e.message) ? e.message : "Hmm, something's not right — check your email or password"
   } finally {
     loading.value = false
   }
@@ -104,13 +98,13 @@ async function onRegister() {
 
       <!-- Brand -->
       <div class="brand">
-        <span class="brand-name">Women's Health</span>
+        <span class="brand-name">With Her</span>
         <span class="brand-dot"></span>
       </div>
 
       <!-- Heading -->
-      <h1 class="heading">{{ mode === 'login' ? 'Welcome back' : 'Create account' }}</h1>
-      <p class="subheading">{{ mode === 'login' ? 'Sign in to your account' : 'Join Women\'s Health today' }}</p>
+      <h1 class="heading">{{ mode === 'login' ? 'Welcome back' : "We're here " }}</h1>
+      <p class="subheading">{{ mode === 'login' ? 'Sign in to your account' : 'Join With Her today' }}</p>
       <div class="accent-bar"></div>
 
       <!-- Tab switcher -->
@@ -127,11 +121,11 @@ async function onRegister() {
       <form v-if="mode === 'login'" @submit.prevent="onLogin" novalidate>
         <div class="field">
           <label for="lemail">Email</label>
-          <input id="lemail" type="email" v-model.trim="loginForm.email" placeholder="jane@example.com" autocomplete="email" required />
+          <input id="lemail" type="email" v-model.trim="loginForm.email" autocomplete="email" required />
         </div>
         <div class="field">
           <label for="lpw">Password</label>
-          <input id="lpw" type="password" v-model="loginForm.password" placeholder="••••••••" autocomplete="current-password" required />
+          <input id="lpw" type="password" v-model="loginForm.password" autocomplete="current-password" required />
         </div>
         <div class="forgot">
           <button type="button" @click="onForgotPassword">Forgot password?</button>
@@ -141,54 +135,29 @@ async function onRegister() {
         </button>
       </form>
 
-      <!-- Register: role selection -->
-      <div v-if="mode === 'register' && registerStep === 'role'">
-        <span class="role-label">I am registering as a...</span>
-        <div class="role-row">
-          <div class="role-card" :class="{ selected: regForm.role === 'user' }" @click="selectRole('user')">
-            <div class="role-title">Patient</div>
-            <div class="role-sub">Find & book care</div>
-          </div>
-          <div class="role-card" :class="{ selected: regForm.role === 'pro' }" @click="selectRole('pro')">
-            <div class="role-title">Health Professional</div>
-            <div class="role-sub">List your services</div>
-          </div>
-        </div>
-        <button class="btn-main" @click="registerStep = 'form'">Continue</button>
-      </div>
-
       <!-- Register: form -->
-      <form v-if="mode === 'register' && registerStep === 'form'" @submit.prevent="onRegister" novalidate autocomplete="off">
-        <p class="section-title">
-          {{ regForm.role === 'pro' ? 'Health professional registration' : 'Patient registration' }}
-        </p>
+      <form v-if="mode === 'register'" @submit.prevent="onRegister" novalidate autocomplete="off">
         <div class="field">
-          <label for="rname">Full name</label>
-          <input id="rname" type="text" v-model.trim="regForm.name" placeholder="Jane Doe" autocomplete="name" required />
+          <label for="rname">What can we call you?</label>
+          <input id="rname" type="text" v-model.trim="regForm.name" autocomplete="name" required />
         </div>
         <div class="field">
-          <label for="remail">Email</label>
-          <input id="remail" type="email" v-model.trim="regForm.email" placeholder="jane@example.com" autocomplete="email" required />
+          <label for="remail">Your email address</label>
+          <input id="remail" type="email" v-model.trim="regForm.email" autocomplete="email" required />
         </div>
         <div class="field">
-          <label for="rpw">Password</label>
-          <input id="rpw" type="password" v-model="regForm.password" placeholder="••••••••" autocomplete="new-password" required />
+          <label for="rpw">Create a password</label>
+          <input id="rpw" type="password" v-model="regForm.password" autocomplete="new-password" required />
           <p class="hint">At least 8 characters, include letters & numbers</p>
         </div>
         <div class="field">
-          <label for="rcpw">Confirm password</label>
-          <input id="rcpw" type="password" v-model="regForm.confirm" placeholder="••••••••" autocomplete="new-password" required />
-        </div>
-        <div v-if="regForm.role === 'pro'" class="field">
-          <label for="rtitle">Professional title</label>
-          <input id="rtitle" type="text" v-model.trim="regForm.title" placeholder="e.g. OB-GYN, Physiotherapist" />
+          <label for="rcpw">Type it once more</label>
+          <input id="rcpw" type="password" v-model="regForm.confirm" autocomplete="new-password" required />
         </div>
         <button class="btn-main" type="submit" :disabled="loading">
-          {{ loading ? 'Creating...' : 'Create account' }}
+          {{ loading ? "Creating..." : "I'm ready — let's go 🌸"}}
         </button>
-        <div class="back-link">
-          <button type="button" @click="registerStep = 'role'">← Change role</button>
-        </div>
+        <p class="switch-hint">Already have an account? <button type="button" @click="switchMode('login')">Sign in</button></p>
       </form>
 
     </div>
@@ -199,11 +168,12 @@ async function onRegister() {
 .page {
   min-height: calc(100vh - 4.5rem);
   display: flex;
-  align-items: center;
   justify-content: center;
   padding: 2rem;
 }
 .card {
+  margin-top: auto;
+  margin-bottom: auto;
   background: #ffffff;
   border-radius: 16px;
   border: 0.5px solid #e8e4e0;
@@ -248,17 +218,7 @@ async function onRegister() {
 }
 .btn-main:hover { background: #0D1F33; }
 .btn-main:disabled { opacity: 0.6; cursor: not-allowed; }
-.role-label { font-size: 15px; font-weight: 500; color: #0D1F33; display: block; margin-bottom: 10px; }
-.role-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.25rem; }
-.role-card {
-  border: 1.5px solid #e8e4e0; border-radius: 10px;
-  padding: 16px 12px; cursor: pointer; text-align: center;
-}
-.role-card.selected { border-color: #1B3A5C; background: #EEF3F8; }
-.role-title { font-size: 15px; font-weight: 500; color: #0D1F33; }
-.role-sub { font-size: 13px; color: #888780; margin-top: 3px; }
-.section-title { font-size: 15px; font-weight: 500; color: #0D1F33; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 0.5px solid #e8e4e0; }
-.back-link { text-align: center; margin-top: 12px; }
-.back-link button { background: none; border: none; font-size: 14px; color: #888780; cursor: pointer; }
-.back-link button:hover { color: #0D1F33; }
+.switch-hint { text-align: center; font-size: 14px; color: #888780; margin-top: 1rem; }
+.switch-hint button { background: none; border: none; padding: 0; font-size: 14px; color: #1B3A5C; cursor: pointer; font-weight: 500; }
+.switch-hint button:hover { text-decoration: underline; }
 </style>

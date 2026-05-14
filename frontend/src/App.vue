@@ -53,7 +53,7 @@ watch(() => route.fullPath, () => {
   <header role="banner">
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm" role="navigation" aria-label="Primary">
       <div class="container">
-        <RouterLink class="navbar-brand fw-bold" to="/">Women's Health</RouterLink>
+        <RouterLink class="navbar-brand fw-bold" to="/">With Her</RouterLink>
 
         <button
           class="navbar-toggler"
