@@ -93,132 +93,96 @@ async function onRegister() {
 </script>
 
 <template>
-  <div class="page">
-    <div class="card">
+  <div class="min-h-[calc(100vh-4.5rem)] flex justify-center p-8">
+    <div class="my-auto bg-white rounded-2xl border border-[#e8e4e0] py-10 px-10 w-full max-w-[460px]">
 
       <!-- Brand -->
-      <div class="brand">
-        <span class="brand-name">With Her</span>
-        <span class="brand-dot"></span>
+      <div class="flex items-center justify-center gap-1.5 mb-5">
+        <span class="text-[17px] font-medium text-primary">With Her</span>
+        <span class="w-[7px] h-[7px] bg-accent rounded-full inline-block"></span>
       </div>
 
       <!-- Heading -->
-      <h1 class="heading">{{ mode === 'login' ? 'Welcome back' : "We're here " }}</h1>
-      <p class="subheading">{{ mode === 'login' ? 'Sign in to your account' : 'Join With Her today' }}</p>
-      <div class="accent-bar"></div>
+      <h1 class="text-[26px] font-semibold text-dark text-center mb-[0.35rem]">{{ mode === 'login' ? 'Welcome back' : "We're here " }}</h1>
+      <p class="text-base text-[#888780] text-center mb-5">{{ mode === 'login' ? 'Sign in to your account' : 'Join With Her today' }}</p>
+      <div class="w-8 h-[3px] bg-accent rounded-sm mx-auto mb-6"></div>
 
       <!-- Tab switcher -->
-      <div class="tab-row">
-        <button class="tab" :class="{ active: mode === 'login' }" @click="switchMode('login')">Sign in</button>
-        <button class="tab" :class="{ active: mode === 'register' }" @click="switchMode('register')">Register</button>
+      <div class="flex bg-background rounded-[10px] p-1 gap-1 mb-6">
+        <button
+          class="flex-1 py-2.5 border-0 rounded-lg text-base font-medium cursor-pointer transition-colors duration-150"
+          :class="mode === 'login' ? 'bg-primary text-white' : 'bg-transparent text-[#888780]'"
+          @click="switchMode('login')"
+        >Sign in</button>
+        <button
+          class="flex-1 py-2.5 border-0 rounded-lg text-base font-medium cursor-pointer transition-colors duration-150"
+          :class="mode === 'register' ? 'bg-primary text-white' : 'bg-transparent text-[#888780]'"
+          @click="switchMode('register')"
+        >Register</button>
       </div>
 
       <!-- Alerts -->
-      <div v-if="errorMsg" class="alert alert-error">{{ errorMsg }}</div>
-      <div v-if="successMsg" class="alert alert-success">{{ successMsg }}</div>
+      <div v-if="errorMsg" class="rounded-lg py-2.5 px-3.5 text-[15px] mb-4 bg-[#FCEBEB] text-[#A32D2D]">{{ errorMsg }}</div>
+      <div v-if="successMsg" class="rounded-lg py-2.5 px-3.5 text-[15px] mb-4 bg-[#E1F5EE] text-[#0F6E56]">{{ successMsg }}</div>
 
       <!-- Login form -->
       <form v-if="mode === 'login'" @submit.prevent="onLogin" novalidate>
-        <div class="field">
-          <label for="lemail">Email</label>
-          <input id="lemail" type="email" v-model.trim="loginForm.email" autocomplete="email" required />
+        <div class="mb-[1.1rem]">
+          <label for="lemail" class="block text-[15px] font-medium text-dark mb-[6px]">Email</label>
+          <input id="lemail" type="email" v-model.trim="loginForm.email" autocomplete="email" required
+            class="w-full box-border px-4 py-3 border border-[#d8d4d0] rounded-lg text-base text-dark bg-white outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(27,58,92,0.08)]" />
         </div>
-        <div class="field">
-          <label for="lpw">Password</label>
-          <input id="lpw" type="password" v-model="loginForm.password" autocomplete="current-password" required />
+        <div class="mb-[1.1rem]">
+          <label for="lpw" class="block text-[15px] font-medium text-dark mb-[6px]">Password</label>
+          <input id="lpw" type="password" v-model="loginForm.password" autocomplete="current-password" required
+            class="w-full box-border px-4 py-3 border border-[#d8d4d0] rounded-lg text-base text-dark bg-white outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(27,58,92,0.08)]" />
         </div>
-        <div class="forgot">
-          <button type="button" @click="onForgotPassword">Forgot password?</button>
+        <div class="text-right mb-4">
+          <button type="button" @click="onForgotPassword"
+            class="bg-transparent border-0 text-sm text-primary cursor-pointer p-0 hover:underline">Forgot password?</button>
         </div>
-        <button class="btn-main" type="submit" :disabled="loading">
+        <button
+          class="w-full py-[13px] bg-primary text-white border-0 rounded-lg text-[17px] font-medium cursor-pointer mt-1 transition-colors duration-150 hover:bg-dark disabled:opacity-60 disabled:cursor-not-allowed"
+          type="submit" :disabled="loading">
           {{ loading ? 'Signing in...' : 'Sign in' }}
         </button>
       </form>
 
-      <!-- Register: form -->
+      <!-- Register form -->
       <form v-if="mode === 'register'" @submit.prevent="onRegister" novalidate autocomplete="off">
-        <div class="field">
-          <label for="rname">What can we call you?</label>
-          <input id="rname" type="text" v-model.trim="regForm.name" autocomplete="name" required />
+        <div class="mb-[1.1rem]">
+          <label for="rname" class="block text-[15px] font-medium text-dark mb-[6px]">What can we call you?</label>
+          <input id="rname" type="text" v-model.trim="regForm.name" autocomplete="name" required
+            class="w-full box-border px-4 py-3 border border-[#d8d4d0] rounded-lg text-base text-dark bg-white outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(27,58,92,0.08)]" />
         </div>
-        <div class="field">
-          <label for="remail">Your email address</label>
-          <input id="remail" type="email" v-model.trim="regForm.email" autocomplete="email" required />
+        <div class="mb-[1.1rem]">
+          <label for="remail" class="block text-[15px] font-medium text-dark mb-[6px]">Your email address</label>
+          <input id="remail" type="email" v-model.trim="regForm.email" autocomplete="email" required
+            class="w-full box-border px-4 py-3 border border-[#d8d4d0] rounded-lg text-base text-dark bg-white outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(27,58,92,0.08)]" />
         </div>
-        <div class="field">
-          <label for="rpw">Create a password</label>
-          <input id="rpw" type="password" v-model="regForm.password" autocomplete="new-password" required />
-          <p class="hint">At least 8 characters, include letters & numbers</p>
+        <div class="mb-[1.1rem]">
+          <label for="rpw" class="block text-[15px] font-medium text-dark mb-[6px]">Create a password</label>
+          <input id="rpw" type="password" v-model="regForm.password" autocomplete="new-password" required
+            class="w-full box-border px-4 py-3 border border-[#d8d4d0] rounded-lg text-base text-dark bg-white outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(27,58,92,0.08)]" />
+          <p class="text-[13px] text-[#888780] mt-1">At least 8 characters, include letters & numbers</p>
         </div>
-        <div class="field">
-          <label for="rcpw">Type it once more</label>
-          <input id="rcpw" type="password" v-model="regForm.confirm" autocomplete="new-password" required />
+        <div class="mb-[1.1rem]">
+          <label for="rcpw" class="block text-[15px] font-medium text-dark mb-[6px]">Type it once more</label>
+          <input id="rcpw" type="password" v-model="regForm.confirm" autocomplete="new-password" required
+            class="w-full box-border px-4 py-3 border border-[#d8d4d0] rounded-lg text-base text-dark bg-white outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(27,58,92,0.08)]" />
         </div>
-        <button class="btn-main" type="submit" :disabled="loading">
+        <button
+          class="w-full py-[13px] bg-primary text-white border-0 rounded-lg text-[17px] font-medium cursor-pointer mt-1 transition-colors duration-150 hover:bg-dark disabled:opacity-60 disabled:cursor-not-allowed"
+          type="submit" :disabled="loading">
           {{ loading ? "Creating..." : "I'm ready — let's go 🌸"}}
         </button>
-        <p class="switch-hint">Already have an account? <button type="button" @click="switchMode('login')">Sign in</button></p>
+        <p class="text-center text-sm text-[#888780] mt-4">
+          Already have an account?
+          <button type="button" @click="switchMode('login')"
+            class="bg-transparent border-0 p-0 text-sm text-primary cursor-pointer font-medium hover:underline">Sign in</button>
+        </p>
       </form>
 
     </div>
   </div>
 </template>
-
-<style scoped>
-.page {
-  min-height: calc(100vh - 4.5rem);
-  display: flex;
-  justify-content: center;
-  padding: 2rem;
-}
-.card {
-  margin-top: auto;
-  margin-bottom: auto;
-  background: #ffffff;
-  border-radius: 16px;
-  border: 0.5px solid #e8e4e0;
-  padding: 2.5rem;
-  width: 100%;
-  max-width: 460px;
-}
-.brand {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-bottom: 1.25rem;
-}
-.brand-name { font-size: 17px; font-weight: 500; color: #1B3A5C; }
-.brand-dot { width: 7px; height: 7px; background: #E8B4B8; border-radius: 50%; display: inline-block; }
-.heading { font-size: 26px; font-weight: 600; color: #0D1F33; text-align: center; margin: 0 0 0.35rem; }
-.subheading { font-size: 16px; color: #888780; text-align: center; margin: 0 0 1.25rem; }
-.accent-bar { width: 32px; height: 3px; background: #E8B4B8; border-radius: 2px; margin: 0 auto 1.5rem; }
-.tab-row { display: flex; background: #F9F8F7; border-radius: 10px; padding: 4px; gap: 4px; margin-bottom: 1.5rem; }
-.tab { flex: 1; padding: 10px; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; background: transparent; color: #888780; }
-.tab.active { background: #1B3A5C; color: #ffffff; }
-.alert { border-radius: 8px; padding: 10px 14px; font-size: 15px; margin-bottom: 1rem; }
-.alert-error { background: #FCEBEB; color: #A32D2D; }
-.alert-success { background: #E1F5EE; color: #0F6E56; }
-.field { margin-bottom: 1.1rem; }
-.field label { display: block; font-size: 15px; font-weight: 500; color: #0D1F33; margin-bottom: 6px; }
-.field input {
-  width: 100%; box-sizing: border-box; padding: 12px 16px;
-  border: 0.5px solid #d8d4d0; border-radius: 8px;
-  font-size: 16px; color: #0D1F33; background: #fff; outline: none;
-}
-.field input:focus { border-color: #1B3A5C; box-shadow: 0 0 0 3px rgba(27,58,92,0.08); }
-.hint { font-size: 13px; color: #888780; margin-top: 4px; }
-.forgot { text-align: right; margin-bottom: 1rem; }
-.forgot button { background: none; border: none; font-size: 14px; color: #1B3A5C; cursor: pointer; padding: 0; }
-.forgot button:hover { text-decoration: underline; }
-.btn-main {
-  width: 100%; padding: 13px; background: #1B3A5C;
-  color: #fff; border: none; border-radius: 8px;
-  font-size: 17px; font-weight: 500; cursor: pointer; margin-top: 0.25rem;
-}
-.btn-main:hover { background: #0D1F33; }
-.btn-main:disabled { opacity: 0.6; cursor: not-allowed; }
-.switch-hint { text-align: center; font-size: 14px; color: #888780; margin-top: 1rem; }
-.switch-hint button { background: none; border: none; padding: 0; font-size: 14px; color: #1B3A5C; cursor: pointer; font-weight: 500; }
-.switch-hint button:hover { text-decoration: underline; }
-</style>

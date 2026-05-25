@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
-import ProDashboard from '@/views/ProDashboard.vue'
 import LoginRegister from '@/components/LoginRegister.vue'
 import Hub from '@/views/MyHealthHub.vue'
 import { ready, isAuthenticated, hasRole } from '../services/auth'
@@ -25,7 +24,6 @@ const routes = [
   },
   { path: '/auth', name: 'auth', component: LoginRegister },
   { path: '/hub', name: 'hub', component: Hub, meta: { requiresAuth: true } },
-  { path: '/pro', name: 'pro', component: ProDashboard, meta: { requiresAuth: true, roles: ['pro'] } },
   { path: '/book', name: 'BookAppointment', component: () => import('@/views/AppointmentBooking.vue') },
   { path: '/firebase-login', name: 'FireLogin', component: () => import('@/views/FirebaseSigninView.vue') },
   { path: '/:pathMatch(.*)*', component: () => import('@/views/NotFound.vue') },

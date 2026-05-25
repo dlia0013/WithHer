@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
 import { current } from '@/stores/user'
 import { logout } from '@/services/auth'
@@ -7,22 +7,37 @@ import { logout } from '@/services/auth'
 const router = useRouter()
 const route = useRoute()
 
-async function handleLogout () {
+/*
+  Mobile menu state.
+  ref() creates a reactive variable — when it changes, Vue re-renders.
+  We use this instead of Bootstrap's data-bs-toggle, so no Bootstrap JS needed.
+*/
+const isMenuOpen = ref(false)
+const isDropdownOpen = ref(false)
+
+function toggleMenu() { isMenuOpen.value = !isMenuOpen.value }
+function toggleDropdown() { isDropdownOpen.value = !isDropdownOpen.value }
+
+// Close menus when user navigates (tapped a link on mobile)
+watch(() => route.fullPath, () => {
+  isMenuOpen.value = false
+  isDropdownOpen.value = false
+})
+
+async function handleLogout() {
   try {
     await logout()
     router.replace('/')
   } catch (e) { console.error(e) }
 }
 
+// A11y helpers — update page title and announce route changes to screen readers
 function pageTitleFromRoute(r) {
-  return ((r.meta?.title || r.name || 'Women\'s Health') + ' - WithHer')
+  return (r.meta?.title || r.name || "Women's Health") + ' — WithHer'
 }
 function focusMain() {
   const main = document.getElementById('main')
-  if (main) {
-    main.setAttribute('tabindex', '-1')
-    main.focus()
-  }
+  if (main) { main.setAttribute('tabindex', '-1'); main.focus() }
 }
 function announce(text) {
   const box = document.getElementById('a11y-announcer')
@@ -41,169 +56,201 @@ watch(() => route.fullPath, () => {
   focusMain()
   announce(t)
 })
+
+/*
+  Nav links as data — v-for in the template loops over this.
+  Adding a new nav item = just add one line here, no template edits.
+*/
+const navLinks = [
+  { to: '/learn',     label: 'Learn & Explore' },
+  { to: '/care',      label: 'Find Care' },
+  { to: '/community', label: 'Community & Support' },
+  { to: '/about',     label: 'About Us' },
+]
 </script>
 
 <template>
-  <a class="skip-link" href="#main">Skip to main content</a>
+  <!-- Skip link: only visible on keyboard focus -->
+  <a
+    href="#main"
+    class="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[9999] focus:bg-dark focus:text-white focus:px-3 focus:py-2 focus:rounded-lg focus:no-underline"
+  >
+    Skip to main content
+  </a>
 
+  <!-- NAVBAR -->
   <header role="banner">
-    <nav class="navbar navbar-expand-lg fixed-top wh-nav" role="navigation" aria-label="Primary">
-      <div class="container">
-        <RouterLink class="navbar-brand wh-brand" to="/">
-          With<span class="brand-accent">Her</span>
+    <nav
+      class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-[#e2e8f0]"
+      role="navigation"
+      aria-label="Primary"
+    >
+      <div class="w-full px-6 md:px-10 h-16 flex items-center justify-between">
+
+        <!-- Logo -->
+        <RouterLink
+          to="/"
+          class="font-lora text-[20px] font-semibold text-primary no-underline tracking-[-0.3px]"
+        >
+          With<span class="text-accent-dark">Her</span>
         </RouterLink>
 
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#mainNav"
-          aria-controls="mainNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
+        <!-- Desktop links — hidden on mobile -->
+        <div class="hidden md:flex items-center gap-1">
+          <RouterLink
+            v-for="link in navLinks"
+            :key="link.to"
+            :to="link.to"
+            class="text-[14px] text-text-mid px-3 py-2 rounded-lg no-underline transition-colors duration-200 hover:text-dark"
+            active-class="text-primary font-medium"
+          >
+            {{ link.label }}
+          </RouterLink>
 
-        <div id="mainNav" class="collapse navbar-collapse">
-          <ul class="navbar-nav ms-auto align-items-lg-center">
-            <li class="nav-item"><RouterLink class="nav-link" to="/learn">Learn &amp; Explore</RouterLink></li>
-            <li class="nav-item"><RouterLink class="nav-link" to="/care">Find Care</RouterLink></li>
-            <li class="nav-item"><RouterLink class="nav-link" to="/community">Community &amp; Support</RouterLink></li>
-            <li class="nav-item"><RouterLink class="nav-link" to="/about">About Us</RouterLink></li>
-            <li class="nav-item ms-lg-2" v-if="!current.user">
-              <RouterLink class="nav-link" to="/auth">Login</RouterLink>
-            </li>
+          <!-- Logged out -->
+          <template v-if="!current.user">
+            <RouterLink
+              to="/auth"
+              class="ml-1 text-[14px] text-text-mid px-3 py-2 no-underline transition-colors duration-200 hover:text-dark"
+            >
+              Login
+            </RouterLink>
+          </template>
 
-            <template v-else>
-              <li class="nav-item ms-lg-2">
-                <RouterLink class="nav-cta" to="/hub">My Health Hub</RouterLink>
-              </li>
-              <li class="nav-item dropdown ms-lg-2">
-                <a
-                  class="nav-link nav-user dropdown-toggle"
-                  href="#"
-                  role="button"
-                  data-bs-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
+          <!-- Logged in -->
+          <template v-else>
+            <RouterLink
+              to="/hub"
+              class="ml-2 bg-primary text-white text-[14px] font-medium px-[18px] py-2 rounded-full no-underline transition-all duration-200 hover:bg-primary-mid hover:-translate-y-px"
+            >
+              My Health Hub
+            </RouterLink>
+
+            <!-- Account dropdown -->
+            <div class="relative ml-2">
+              <button
+                @click="toggleDropdown"
+                :aria-expanded="isDropdownOpen"
+                class="flex items-center gap-1 text-[13px] text-text-light px-3 py-2 rounded-lg transition-colors duration-200 hover:text-text-mid"
+              >
+                {{ current.user.email || 'Account' }}
+                <i
+                  class="ti ti-chevron-down text-xs transition-transform duration-200"
+                  :class="isDropdownOpen ? 'rotate-180' : ''"
+                />
+              </button>
+
+              <div
+                v-if="isDropdownOpen"
+                class="absolute right-0 top-full mt-1 bg-white border border-[#e2e8f0] rounded-xl shadow-[0_4px_16px_rgba(13,31,51,0.08)] py-1 min-w-[140px]"
+              >
+                <button
+                  @click="handleLogout"
+                  class="w-full text-left text-[14px] text-text-mid px-4 py-2 transition-colors duration-200 hover:text-primary hover:bg-primary-light"
                 >
-                  {{ current.user.email || 'Account' }}
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                  <li><a class="dropdown-item" href="#" @click.prevent="handleLogout">Logout</a></li>
-                </ul>
-              </li>
-            </template>
-          </ul>
+                  Logout
+                </button>
+              </div>
+            </div>
+          </template>
         </div>
+
+        <!-- Mobile: hamburger -->
+        <button
+          @click="toggleMenu"
+          :aria-expanded="isMenuOpen"
+          aria-label="Toggle navigation"
+          class="md:hidden p-2 rounded-lg text-text-mid transition-colors duration-200 hover:text-dark hover:bg-[#f0f4f8]"
+        >
+          <!--
+            Switch between menu and X icon based on state.
+            Tabler Icons: ti-menu-2 = hamburger, ti-x = close
+          -->
+          <i :class="isMenuOpen ? 'ti ti-x' : 'ti ti-menu-2'" class="text-xl" />
+        </button>
       </div>
+
+      <!-- Mobile menu — animated with Vue <Transition> -->
+      <!--
+        <Transition> is a Vue built-in component that applies CSS classes
+        at the right moments during enter/leave.
+        enter-from = initial state (hidden), enter-to = final state (visible)
+        leave is the reverse. Tailwind transition classes do the actual animation.
+      -->
+      <Transition
+        enter-active-class="transition-all duration-200 ease-out"
+        enter-from-class="opacity-0 -translate-y-2"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition-all duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-2"
+      >
+        <div
+          v-if="isMenuOpen"
+          class="md:hidden bg-white border-t border-[#e2e8f0] px-5 py-3 flex flex-col gap-0.5"
+        >
+          <RouterLink
+            v-for="link in navLinks"
+            :key="link.to"
+            :to="link.to"
+            class="text-[15px] text-text-mid py-2.5 px-3 rounded-lg no-underline transition-colors duration-200 hover:text-dark hover:bg-[#f8f9fa]"
+            active-class="text-primary font-medium bg-primary-light"
+          >
+            {{ link.label }}
+          </RouterLink>
+
+          <template v-if="!current.user">
+            <RouterLink
+              to="/auth"
+              class="text-[15px] text-text-mid py-2.5 px-3 rounded-lg no-underline hover:text-dark hover:bg-[#f8f9fa]"
+            >
+              Login
+            </RouterLink>
+          </template>
+
+          <template v-else>
+            <RouterLink
+              to="/hub"
+              class="mt-2 bg-primary text-white text-[15px] font-medium px-4 py-3 rounded-full no-underline text-center transition-colors duration-200 hover:bg-primary-mid"
+            >
+              My Health Hub
+            </RouterLink>
+            <button
+              @click="handleLogout"
+              class="mt-1 text-left text-[14px] text-text-light py-2.5 px-3 rounded-lg hover:text-dark"
+            >
+              Logout
+            </button>
+          </template>
+        </div>
+      </Transition>
     </nav>
   </header>
 
-  <div id="a11y-announcer" class="sr-only" aria-live="polite"></div>
+  <!-- A11y: screen readers announce route changes via this live region -->
+  <div id="a11y-announcer" class="sr-only" aria-live="polite" />
 
-  <main id="main" class="main-wrapper" role="main">
+  <!--
+    pt-16 = 64px = navbar height.
+    Without this, content hides under the fixed navbar.
+    min-h-screen ensures the background covers the full viewport.
+  -->
+  <main id="main" class="pt-16 min-h-screen" role="main">
     <RouterView />
   </main>
 </template>
 
 <style>
-.sr-only {
-  position: absolute !important;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0, 0, 0, 0);
-  white-space: nowrap; border: 0;
-}
+/* Global styles — no scoped, these apply app-wide */
 
-.skip-link {
-  position: absolute;
-  left: 8px; top: -40px;
-  z-index: 9999;
-  background: #111; color: #fff;
-  padding: .5rem .75rem;
-  border-radius: .5rem;
-  text-decoration: none;
-}
-.skip-link:focus { top: 8px; }
-
-:focus-visible {
-  outline: 3px solid #1B3A5C;
-  outline-offset: 2px;
-}
-
+/* Respect user's reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
 
-
-body {
-  background-color: #F9F8F7 !important;
-  color: #0D1F33;
-  font-family: 'DM Sans', system-ui, sans-serif;
+/* Keyboard focus ring — never remove this, it's essential for accessibility */
+:focus-visible {
+  outline: 3px solid #1B3A5C;
+  outline-offset: 2px;
 }
-
-.main-wrapper {
-  padding-top: 4.5rem;
-  min-height: 100vh; /* 确保内容不足一屏时背景也铺满 */
-}
-
-.wh-nav {
-  background: #FFFFFF;
-  border-bottom: 0.5px solid #e2e8f0;
-}
-
-/* Logo */
-.wh-brand {
-  font-family: 'Lora', Georgia, serif;
-  font-size: 20px;
-  font-weight: 600;
-  color: #1B3A5C !important; /* !important 覆盖 Bootstrap 的默认颜色 */
-  text-decoration: none;
-  letter-spacing: -0.3px;
-}
-.brand-accent { color: #b8737a; } /* blush accent on "Her" */
-
-/* Nav links */
-.wh-nav .nav-link {
-  font-family: 'DM Sans', system-ui, sans-serif;
-  font-size: 14px;
-  color: #4a5a6b !important;
-  transition: color 0.2s;
-  padding: 0.5rem 0.75rem;
-}
-.wh-nav .nav-link:hover,
-.wh-nav .nav-link.router-link-active {
-  color: #1B3A5C !important;
-}
-
-/* "My Health Hub" 实心按钮样式 */
-.nav-cta {
-  display: inline-block;
-  background: #1B3A5C;
-  color: white !important;
-  font-family: 'DM Sans', system-ui, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 8px 18px;
-  border-radius: 100px;
-  text-decoration: none;
-  transition: background 0.2s, transform 0.15s;
-}
-.nav-cta:hover { background: #2d5480; transform: translateY(-1px); }
-
-.nav-user {
-  font-size: 13px !important;
-  color: #8a9bb0 !important;
-}
-
-.wh-nav .navbar-toggler { border-color: #e2e8f0; }
-.wh-nav .dropdown-menu  { border-color: #e2e8f0; border-radius: 12px; }
-.wh-nav .dropdown-item  {
-  font-family: 'DM Sans', system-ui, sans-serif;
-  font-size: 14px;
-  color: #4a5a6b;
-}
-.wh-nav .dropdown-item:hover { color: #1B3A5C; background: #e8eef5; }
 </style>
