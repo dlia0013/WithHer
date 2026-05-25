@@ -28,3 +28,6 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+# AI context file — local only
+docs/CONTEXT.md

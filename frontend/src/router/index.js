@@ -3,6 +3,7 @@ import HomeView from '@/views/HomeView.vue'
 import LoginRegister from '@/components/LoginRegister.vue'
 import Hub from '@/views/MyHealthHub.vue'
 import { ready, isAuthenticated, hasRole } from '../services/auth'
+import GuideView from '@/views/GuideView.vue'
 
 const routes = [
   { path: '/', name: 'home', component: HomeView },
@@ -28,6 +29,7 @@ const routes = [
   { path: '/firebase-login', name: 'FireLogin', component: () => import('@/views/FirebaseSigninView.vue') },
   { path: '/:pathMatch(.*)*', component: () => import('@/views/NotFound.vue') },
   { path: '/map', name: 'map', component: () => import('@/views/NearbyCareMap.vue') },
+  { path: '/guide', name: 'guide', component: GuideView }
 ]
 
 const router = createRouter({
