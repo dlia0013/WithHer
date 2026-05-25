@@ -121,6 +121,7 @@ const navLinks = [
           <template v-else>
             <RouterLink
               to="/hub"
+              active-class=""
               class="ml-2 bg-primary text-white text-[14px] font-medium px-[18px] py-2 rounded-full no-underline transition-all duration-200 hover:bg-primary-mid hover:-translate-y-px"
             >
               My Health Hub
