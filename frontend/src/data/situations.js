@@ -21,7 +21,10 @@ export const situations = [
         detail: 'Call 000 for an ambulance, or go directly to your nearest emergency department (ED). You cannot be turned away from an ED regardless of your visa status or insurance. If you\'re unsure whether to call 000 or drive yourself, call 13SICK first — they\'ll advise you.'
       }
     ],
-    tags: ['Find a bulk billing clinic', 'What is Medicare?', 'Call 13SICK', 'When to go to ED'],
+    tags: [{ label: 'Find a bulk billing clinic', type: 'internal', href: '/care' },
+            { label: 'What is Medicare?', type: 'internal', href: '/learn' },
+            { label: 'Call 13SICK', type: 'phone', href: 'tel:137425' },
+            { label: 'When to go to ED', type: 'internal', href: '/learn' }],
     aiPrompt: 'I feel unwell and need help figuring out where to go in Australia.'
   },
   {
@@ -53,7 +56,11 @@ export const situations = [
         detail: 'Australia has very high UV levels — wear SPF 50+ sunscreen every day, even when cloudy. For a new or changing mole, rash, eczema or skin concern, see a GP. Many clinics offer bulk billed skin checks. Don\'t wait — early detection matters.'
       }
     ],
-    tags: ['Find a chemist near me', 'Panadol vs Nurofen', 'SPF 50+ sunscreen'],
+    tags: [
+          { label: 'Find a chemist near me', type: 'external', href: 'https://www.google.com/maps/search/pharmacy' },
+          { label: 'Panadol vs Nurofen', type: 'external', href: 'https://www.nps.org.au' },
+          { label: 'SPF 50+ sunscreen', type: 'external', href: 'https://www.cancer.org.au/cancer-information/causes-and-prevention/sun-safety' },
+        ],
     aiPrompt: 'I have minor symptoms and want to know if I can manage them at home or if I need to see a GP.'
   },
   {
@@ -77,7 +84,11 @@ export const situations = [
         detail: 'Australia has free screening programs for cervical cancer (Cervical Screening Test) and breast cancer (BreastScreen). Ask your GP what you\'re due for based on your age. These are free and highly recommended.'
       }
     ],
-    tags: ['Find a GP near me', 'Cervical screening explained', 'Free screening programs'],
+    tags: [
+          { label: 'Find a GP near me', type: 'internal', href: '/care' },
+          { label: 'Cervical screening explained', type: 'external', href: 'https://www.health.gov.au/topics/cervical-screening' },
+          { label: 'Free screening programs', type: 'external', href: 'https://www.health.gov.au/topics/cancer/screening' },
+        ],
     aiPrompt: 'I want to get a routine health checkup in Australia. What should I know before I go?'
   },
   {
@@ -101,7 +112,12 @@ export const situations = [
         detail: 'If a clinic doesn\'t bulk bill, they\'ll charge a "gap fee" on top of what Medicare covers. Always ask the total cost upfront before your appointment — you have every right to know, and no clinic should refuse to tell you.'
       }
     ],
-    tags: ['Bulk billing explained', 'What is OSHC?', 'What is OVHC?', 'Find free clinics near me'],
+    tags: [
+          { label: 'Bulk billing explained', type: 'internal', href: '/learn' },
+          { label: 'What is OSHC?', type: 'external', href: 'https://www.servicesaustralia.gov.au/overseas-student-health-cover' },
+          { label: 'What is OVHC?', type: 'external', href: 'https://www.servicesaustralia.gov.au/overseas-visitors-health-cover' },
+          { label: 'Find free clinics near me', type: 'internal', href: '/care' },
+        ],
     aiPrompt: 'I\'m worried about the cost of healthcare in Australia. Can you help me understand what I\'ll need to pay?'
   },
   {
@@ -125,7 +141,11 @@ export const situations = [
         detail: 'Call the clinic and ask them to explain every line item — you have the right to an itemised bill. You can also call Medicare on 132 011. They\'re used to explaining bills and won\'t judge you for asking.'
       }
     ],
-    tags: ['How to claim Medicare rebate', 'What is a gap fee?', 'Contact Medicare 132 011'],
+    tags: [
+          { label: 'How to claim Medicare rebate', type: 'external', href: 'https://www.servicesaustralia.gov.au/how-to-claim-medicare-benefit' },
+          { label: 'What is a gap fee?', type: 'internal', href: '/learn' },
+          { label: 'Contact Medicare', type: 'phone', href: 'tel:132011' },
+        ],
     aiPrompt: 'I received a medical bill in Australia and I\'m confused about what I owe. Can you help me understand it?'
   },
   {
@@ -149,7 +169,12 @@ export const situations = [
         detail: 'Call Lifeline on 13 11 14 any time, day or night — they\'re there for any kind of emotional distress, not just extreme crisis. If you feel unsafe, go to your nearest ED or call 000.'
       }
     ],
-    tags: ['Beyond Blue 1300 22 4636', 'Lifeline 13 11 14', 'Headspace', 'Mental Health Treatment Plan'],
+    tags: [
+          { label: 'Beyond Blue', type: 'phone', href: 'tel:1300224636' },
+          { label: 'Lifeline', type: 'phone', href: 'tel:131114' },
+          { label: 'Headspace', type: 'external', href: 'https://headspace.org.au' },
+          { label: 'Mental Health Treatment Plan', type: 'internal', href: '/learn' },
+        ],
     aiPrompt: 'I\'ve been feeling overwhelmed and anxious since moving to Australia. What mental health support is available to me?'
   },
   {
@@ -173,7 +198,11 @@ export const situations = [
         detail: 'Unusual discharge, pain, or bleeding should always be checked by a GP. You can ask for a female doctor when you book — you always have that right. Whatever you share is confidential.'
       }
     ],
-    tags: ['Find a sexual health clinic', 'Family Planning Australia', 'Contraception options'],
+    tags: [
+          { label: 'Find a sexual health clinic', type: 'external', href: 'https://www.google.com/maps/search/sexual+health+clinic+australia' },
+          { label: 'Family Planning Australia', type: 'external', href: 'https://www.fpnsw.org.au' },
+          { label: 'Contraception options', type: 'internal', href: '/learn' },
+        ],
     aiPrompt: 'I have questions about sexual and reproductive health in Australia. Can you help me understand my options?'
   },
   {
@@ -197,7 +226,11 @@ export const situations = [
         detail: 'Severe toothache, swelling in your jaw or face, or a dental abscess needs urgent attention. If you can\'t see a dentist quickly, go to a hospital ED — dental infections can become serious and spread quickly.'
       }
     ],
-    tags: ['Find a community dental clinic', 'University dental schools', 'Dental health insurance'],
+    tags: [
+          { label: 'Find a community dental clinic', type: 'external', href: 'https://www.google.com/maps/search/community+dental+clinic' },
+          { label: 'University dental schools', type: 'external', href: 'https://www.ada.org.au/find-a-dentist' },
+          { label: 'Dental health insurance', type: 'internal', href: '/learn' },
+        ],
     aiPrompt: 'I need dental care in Australia. What are my options and what will it cost?'
   },
   {
@@ -225,7 +258,11 @@ export const situations = [
         detail: 'Everything you share with a doctor is private. They cannot share your information with family members, employers, or visa authorities without your consent (except in very rare safety situations). You can ask your doctor to explain their privacy policy.'
       }
     ],
-    tags: ['TIS National interpreter 131 450', 'Australian Charter of Healthcare Rights', 'Find a female GP'],
+    tags: [
+          { label: 'TIS National interpreter', type: 'phone', href: 'tel:131450' },
+          { label: 'Australian Charter of Healthcare Rights', type: 'external', href: 'https://www.safetyandquality.gov.au/australian-charter-healthcare-rights' },
+          { label: 'Find a female GP', type: 'internal', href: '/care' },
+        ],
     aiPrompt: 'What are my rights as a patient in Australia? I want to know what I can ask for.'
   },
   {
@@ -249,7 +286,11 @@ export const situations = [
         detail: 'Common medicines like paracetamol, ibuprofen, antihistamines, and some contraceptives are available without a prescription at any pharmacy (chemist). Pharmacists are highly trained — don\'t hesitate to ask them questions, it\'s part of their job.'
       }
     ],
-    tags: ['Find a pharmacy near me', 'PBS medicines list', 'Bringing medicine into Australia'],
+    tags: [
+  { label: 'Find a pharmacy near me', type: 'external', href: 'https://www.google.com/maps/search/pharmacy' },
+  { label: 'PBS medicines list', type: 'external', href: 'https://www.pbs.gov.au' },
+  { label: 'Bringing medicine into Australia', type: 'external', href: 'https://www.abf.gov.au/entering-and-leaving-australia/what-you-can-bring-in/categories/medicines-and-substances' },
+],
     aiPrompt: 'I need to get my regular medication in Australia. How do prescriptions work here?'
   },
   {
@@ -273,7 +314,11 @@ export const situations = [
         detail: 'Sudden vision changes, eye pain, redness, or flashes of light should be seen urgently — same day if possible. Call an optometrist or go to an ED. Don\'t wait for a routine appointment if something feels sudden or serious.'
       }
     ],
-    tags: ['Find an optometrist near me', 'Medicare eye test', 'Affordable glasses in Australia'],
+    tags: [
+  { label: 'Find an optometrist near me', type: 'external', href: 'https://www.google.com/maps/search/optometrist' },
+  { label: 'Medicare eye test', type: 'internal', href: '/learn' },
+  { label: 'Affordable glasses in Australia', type: 'external', href: 'https://www.specsavers.com.au' },
+],
     aiPrompt: 'I need an eye check or new glasses in Australia. What does Medicare cover and what will I pay?'
   },
   {
@@ -301,7 +346,13 @@ export const situations = [
         detail: 'Beyond Blue: 1300 22 4636 (mental health support). TIS National: 131 450 (free interpreter service). Medicare: 132 011 (billing and claims questions). 1800RESPECT: 1800 737 732 (domestic violence support, 24/7).'
       }
     ],
-    tags: ['000', '13SICK', 'Lifeline 13 11 14', 'Beyond Blue', 'TIS National 131 450'],
+    tags: [
+  { label: 'Call 000', type: 'phone', href: 'tel:000' },
+  { label: 'Call 13SICK', type: 'phone', href: 'tel:137425' },
+  { label: 'Lifeline', type: 'phone', href: 'tel:131114' },
+  { label: 'Beyond Blue', type: 'phone', href: 'tel:1300224636' },
+  { label: 'TIS National', type: 'phone', href: 'tel:131450' },
+],
     aiPrompt: 'What are the important health and emergency phone numbers I should know in Australia?'
   }
 ]

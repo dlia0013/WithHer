@@ -121,11 +121,14 @@
 
             <!-- Related tags -->
             <div class="result-tags">
-              <span
+              <a
                 v-for="tag in selected.tags"
-                :key="tag"
+                :key="tag.label"
+                :href="tag.href"
+                :target="tag.type === 'external' ? '_blank' : null"
+                :rel="tag.type === 'external' ? 'noopener noreferrer' : null"
                 class="result-tag"
-              >{{ tag }}</span>
+              >{{ tag.label }}</a>
             </div>
 
             <!-- AI ask more -->
