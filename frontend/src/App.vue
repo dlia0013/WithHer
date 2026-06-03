@@ -62,6 +62,7 @@ watch(() => route.fullPath, () => {
   Adding a new nav item = just add one line here, no template edits.
 */
 const navLinks = [
+  { to: '/guide',     label: 'Get Guidance' },
   { to: '/learn',     label: 'Learn & Explore' },
   { to: '/care',      label: 'Find Care' },
   { to: '/community', label: 'Community & Support' },
@@ -96,16 +97,21 @@ const navLinks = [
         </RouterLink>
 
         <!-- Desktop links — hidden on mobile -->
-        <div class="hidden md:flex items-center gap-1">
+        <div class="hidden md:flex items-center gap-4">
+        <!-- Get Guidance pill -->
+
           <RouterLink
             v-for="link in navLinks"
             :key="link.to"
             :to="link.to"
-            class="text-[14px] text-text-mid px-3 py-2 rounded-lg no-underline transition-colors duration-200 hover:text-dark"
-            active-class="text-primary font-medium"
+            :class="link.to === '/guide' 
+              ? 'text-[13px] bg-primary text-white font-medium px-3 py-1.5 rounded-full no-underline'
+              : 'text-[14px] text-text-mid px-3 py-2 transition-colors duration-200 hover:text-dark'"
+            :active-class="link.to === '/guide' ? '' : 'text-primary font-medium underline decoration-accent decoration-2 underline-offset-4'"
           >
             {{ link.label }}
           </RouterLink>
+          
 
           <!-- Logged out -->
           <template v-if="!current.user">
@@ -121,7 +127,8 @@ const navLinks = [
           <template v-else>
             <RouterLink
               to="/hub"
-              class="ml-2 bg-primary text-white text-[14px] font-medium px-[18px] py-2 rounded-full no-underline transition-all duration-200 hover:bg-primary-mid hover:-translate-y-px"
+              class="text-[14px] text-text-mid transition-colors duration-200 hover:text-dark"
+              active-class="text-primary font-medium underline decoration-accent decoration-2 underline-offset-[6px]"
             >
               My Health Hub
             </RouterLink>
@@ -194,7 +201,7 @@ const navLinks = [
             :key="link.to"
             :to="link.to"
             class="text-[15px] text-text-mid py-2.5 px-3 rounded-lg no-underline transition-colors duration-200 hover:text-dark hover:bg-[#f8f9fa]"
-            active-class="text-primary font-medium bg-primary-light"
+            active-class="text-primary font-medium border-b-2 border-accent"
           >
             {{ link.label }}
           </RouterLink>
@@ -211,6 +218,7 @@ const navLinks = [
           <template v-else>
             <RouterLink
               to="/hub"
+              active-class=""
               class="mt-2 bg-primary text-white text-[15px] font-medium px-4 py-3 rounded-full no-underline text-center transition-colors duration-200 hover:bg-primary-mid"
             >
               My Health Hub

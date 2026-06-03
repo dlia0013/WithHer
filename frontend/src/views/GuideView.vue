@@ -16,11 +16,28 @@
     <section class="guide-body">
       <div class="container">
 
+        <!-- Disclaimer -->
+        <div class="disclaimer">
+          <i class="ti ti-alert-circle" aria-hidden="true"></i>
+          <p>This information is general only and does not replace professional medical advice. If you are unsure, please speak to a GP or pharmacist.</p>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="filter-row">
+          <button
+            v-for="f in filters"
+            :key="f.key"
+            class="filter-btn"
+            :class="{ active: activeFilter === f.key }"
+            @click="activeFilter = f.key; selectedId = null"
+          >{{ f.label }}</button>
+        </div>
+
         <!-- Situation cards -->
         <p class="section-label">I know what I need</p>
         <div class="cards-grid">
           <button
-            v-for="sit in situations"
+            v-for="sit in filteredSituations"
             :key="sit.id"
             class="sit-card"
             :class="{ active: selectedId === sit.id }"
@@ -104,11 +121,14 @@
 
             <!-- Related tags -->
             <div class="result-tags">
-              <span
+              <a
                 v-for="tag in selected.tags"
-                :key="tag"
+                :key="tag.label"
+                :href="tag.href"
+                :target="tag.type === 'external' ? '_blank' : null"
+                :rel="tag.type === 'external' ? 'noopener noreferrer' : null"
                 class="result-tag"
-              >{{ tag }}</span>
+              >{{ tag.label }}</a>
             </div>
 
             <!-- AI ask more -->
@@ -166,12 +186,28 @@
 import { ref, computed } from 'vue'
 import { situations, guideQuestions } from '@/data/situations.js'
 
-const selectedId   = ref(null)
-const guideStarted = ref(false)
-const userQuestion = ref('')
-const aiResponse   = ref('')
-const aiError      = ref('')
-const aiLoading    = ref(false)
+const selectedId    = ref(null)
+const guideStarted  = ref(false)
+const activeFilter  = ref('all')
+const userQuestion  = ref('')
+const aiResponse    = ref('')
+const aiError       = ref('')
+const aiLoading     = ref(false)
+
+const filters = [
+  { key: 'all',       label: 'All' },
+  { key: 'care',      label: 'Getting care' },
+  { key: 'cost',      label: 'Costs' },
+  { key: 'womens',    label: "Women's health" },
+  { key: 'wellbeing', label: 'Wellbeing' },
+  { key: 'rights',    label: 'Rights & info' },
+]
+
+const filteredSituations = computed(() =>
+  activeFilter.value === 'all'
+    ? situations
+    : situations.filter(s => s.category === activeFilter.value)
+)
 
 const selected        = computed(() => situations.find(s => s.id === selectedId.value) || null)
 const currentQuestion = computed(() => guideQuestions[0])
@@ -752,4 +788,65 @@ Context: the user is asking about "${selected.value?.title}".`
     padding: 1.1rem;
   }
 }
+
+/* ─── Disclaimer ─── */
+.disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: #fdf5f5;
+  border: 1px solid #f2d9db;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.disclaimer .ti-alert-circle {
+  color: #b8737a;
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.disclaimer p {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  color: #b8737a;
+  margin: 0;
+  line-height: 1.55;
+  font-style: italic;
+}
+
+/* ─── Filter bar ─── */
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.filter-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #4a5a6b;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.filter-btn:hover {
+  border-color: #1B3A5C;
+  color: #1B3A5C;
+}
+
+.filter-btn.active {
+  background: #1B3A5C;
+  border-color: #1B3A5C;
+  color: #ffffff;
+}
+
 </style>
