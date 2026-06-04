@@ -22,9 +22,9 @@ export const situations = [
       }
     ],
     tags: [{ label: 'Find a bulk billing clinic', type: 'internal', href: '/care' },
-            { label: 'What is Medicare?', type: 'internal', href: '/learn' },
+            { label: 'What is Medicare?', type: 'internal', href: '/learn?article=what-is-medicare' },
             { label: 'Call 13SICK', type: 'phone', href: 'tel:137425' },
-            { label: 'When to go to ED', type: 'internal', href: '/learn' }],
+            { label: 'When to go to ED', type: 'internal', href: '/learn?article=what-is-emergency-department' }],
     aiPrompt: 'I feel unwell and need help figuring out where to go in Australia.'
   },
   {
@@ -113,7 +113,7 @@ export const situations = [
       }
     ],
     tags: [
-          { label: 'Bulk billing explained', type: 'internal', href: '/learn' },
+          { label: 'Bulk billing explained', type: 'internal', href: '/learn?article=what-is-bulk-billing' },
           { label: 'What is OSHC?', type: 'external', href: 'https://www.servicesaustralia.gov.au/overseas-student-health-cover' },
           { label: 'What is OVHC?', type: 'external', href: 'https://www.servicesaustralia.gov.au/overseas-visitors-health-cover' },
           { label: 'Find free clinics near me', type: 'internal', href: '/care' },
