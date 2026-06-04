@@ -146,12 +146,22 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { articles } from '@/data/articles.js'
+import { useRoute } from 'vue-router'
 
 const searchQuery = ref('')
 const activeFilter = ref('all')
 const selectedArticle = ref(null)
+const route = useRoute()
+
+onMounted(() => {
+  const articleId = route.query.article
+  if (articleId) {
+    const match = articles.find(a => a.id === articleId)
+    if (match) selectedArticle.value = match
+  }
+})
 
 const filters = [
   { label: 'All', value: 'all' },
