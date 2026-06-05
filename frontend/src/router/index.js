@@ -13,22 +13,10 @@ const routes = [
   { path: '/about', component: () => import('@/views/AboutUs.vue') },
 
   { path: '/providers/:id', name: 'provider-details', component: () => import('@/views/ProviderDetails.vue') },
-  {
-    path: '/providers/:id/book',
-    name: 'BookAppt',
-    component: () => import('@/views/AppointmentBooking.vue'),
-    props: route => ({
-      providerId: route.params.id,
-      doctor: route.query.doctor || '',
-      clinicEmail: route.query.email || ''
-    })
-  },
   { path: '/auth', name: 'auth', component: LoginRegister },
   { path: '/hub', name: 'hub', component: Hub, meta: { requiresAuth: true } },
-  { path: '/book', name: 'BookAppointment', component: () => import('@/views/AppointmentBooking.vue') },
   { path: '/firebase-login', name: 'FireLogin', component: () => import('@/views/FirebaseSigninView.vue') },
   { path: '/:pathMatch(.*)*', component: () => import('@/views/NotFound.vue') },
-  { path: '/map', name: 'map', component: () => import('@/views/NearbyCareMap.vue') },
   { path: '/guide', name: 'guide', component: GuideView }
 ]
 
