@@ -1,230 +1,405 @@
 <template>
-  <div class="page">
-    <section>
-      <h1 class="h3 mb-4">Find Care</h1>
+  <div class="min-h-screen bg-background">
 
-      <form novalidate @submit.prevent="onSubmit" class="row g-3">
-        <div class="col-md-6">
-          <label class="form-label" for="name">Full name</label>
-          <input
-            id="name"
-            v-model.trim="form.name"
-            :class="['form-control', invalid.name && 'is-invalid']"
-            type="text"
-            placeholder="e.g., Jane Doe"
-            @blur="touch('name')"
-            required
-          />
-          <div class="invalid-feedback">Name is required.</div>
-        </div>
+    <!-- Page header -->
+    <div class="bg-surface border-b border-gray-100 px-4 py-10 md:py-14">
+      <div class="max-w-4xl mx-auto">
+        <h1 class="font-lora text-3xl md:text-4xl text-primary mb-3">
+          Find care near you
+        </h1>
+        <p class="font-dm-sans text-text-mid text-base md:text-lg max-w-xl">
+          Search by suburb or postcode, then filter by what matters most to you.
+        </p>
+      </div>
+    </div>
 
-        <div class="col-md-6">
-          <label class="form-label" for="email">Email</label>
-          <input
-            id="email"
-            v-model.trim="form.email"
-            :class="['form-control', invalid.email && 'is-invalid']"
-            type="email"
-            placeholder="e.g., jane@example.com"
-            @blur="touch('email')"
-            required
-            autocomplete="email"
-          />
-          <div class="invalid-feedback">Please enter a valid email.</div>
-        </div>
+    <!-- Sticky filter panel -->
+    <div class="sticky top-0 z-20 bg-surface border-b border-gray-100 shadow-sm">
+      <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col gap-4">
 
-        <div class="col-md-4">
-          <label class="form-label" for="postcode">Postcode (AU)</label>
-          <input
-            id="postcode"
-            v-model.trim="form.postcode"
-            :class="['form-control', invalid.postcode && 'is-invalid']"
-            type="text"
-            inputmode="numeric"
-            maxlength="4"
-            placeholder="e.g., 3000"
-            @input="digitsOnly('postcode')"
-            @blur="touch('postcode')"
-            required
-          />
-          <div class="invalid-feedback">Postcode must be 4 digits.</div>
-        </div>
+        <!-- Search row -->
+        <div class="flex gap-2">
+          <div class="relative flex-1 max-w-sm">
+            <span class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-text-light text-base"></span>
+            <input
+              v-model="search"
+              type="text"
+              placeholder="Suburb or postcode (e.g. Carlton, 3000)"
+              class="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-200 bg-background font-dm-sans text-sm text-dark placeholder-text-light focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
+            />
+          </div>
 
-        <div class="col-md-4">
-          <label class="form-label" for="type">Appointment type</label>
-          <select
-            id="type"
-            v-model="form.type"
-            :class="['form-select', invalid.type && 'is-invalid']"
-            @blur="touch('type')"
-            required
+          <!-- Use my location -->
+          <button
+            @click="useMyLocation"
+            :disabled="locating"
+            class="flex items-center gap-1.5 px-3 py-2.5 rounded-lg border border-gray-200 bg-background font-dm-sans text-sm text-text-mid hover:border-primary hover:text-primary transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
           >
-            <option value="">Select…</option>
-            <option value="gp">General Practitioner</option>
-            <option value="obgyn">OB-GYN</option>
-            <option value="mental">Mental Health</option>
-            <option value="physio">Physiotherapy</option>
-          </select>
-          <div class="invalid-feedback">Please choose a type.</div>
+            <span :class="['ti text-base', locating ? 'ti-loader-2 animate-spin' : 'ti-current-location']"></span>
+            <span class="hidden sm:inline">{{ locating ? 'Locating…' : 'Near me' }}</span>
+          </button>
         </div>
 
-        <div class="col-12 d-flex gap-2">
-          <button class="btn btn-primary" type="submit">Save preferences</button>
-          <button class="btn btn-outline-secondary" type="button" @click="resetForm">Reset</button>
-        </div>
-      </form>
+        <!-- Filter groups -->
+        <div class="flex flex-col gap-2.5">
 
-      <div v-if="saved" class="alert alert-success mt-4" role="status">
-        Preferences saved. Showing providers near <strong>{{ form.postcode }}</strong> for
-        <strong>{{ typeLabel(form.type) }}</strong>.
+          <!-- Cost -->
+          <div class="flex items-center gap-2">
+            <span class="font-dm-sans text-xs text-text-light w-20 shrink-0">Cost</span>
+            <button
+              @click="bulkBillingOnly = !bulkBillingOnly"
+              :class="[
+                'px-3 py-1.5 rounded-full font-dm-sans text-xs font-medium border transition',
+                bulkBillingOnly
+                  ? 'bg-green-600 text-white border-green-600'
+                  : 'bg-background text-text-mid border-gray-200 hover:border-green-600 hover:text-green-700'
+              ]"
+            >
+              <span class="ti ti-circle-check mr-1"></span>Bulk billing
+            </button>
+          </div>
+
+          <!-- Access -->
+          <div class="flex items-center gap-2">
+            <span class="font-dm-sans text-xs text-text-light w-20 shrink-0">Access</span>
+            <button
+              @click="telehealthOnly = !telehealthOnly"
+              :class="[
+                'px-3 py-1.5 rounded-full font-dm-sans text-xs font-medium border transition',
+                telehealthOnly
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-background text-text-mid border-gray-200 hover:border-primary hover:text-primary'
+              ]"
+            >
+              <span class="ti ti-video mr-1"></span>Telehealth
+            </button>
+          </div>
+
+          <!-- Type of care — multi-select -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-dm-sans text-xs text-text-light w-20 shrink-0">Type of care</span>
+            <button
+              v-for="t in typeFilters"
+              :key="t.value"
+              @click="toggleType(t.value)"
+              :class="[
+                'px-3 py-1.5 rounded-full font-dm-sans text-xs font-medium border transition',
+                activeTypes.includes(t.value)
+                  ? 'bg-accent-dark text-white border-accent-dark'
+                  : 'bg-background text-text-mid border-gray-200 hover:border-accent-dark hover:text-accent-dark'
+              ]"
+            >
+              <span :class="['ti mr-1', t.icon]"></span>{{ t.label }}
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Active filter summary + clear -->
+        <div v-if="hasActiveFilters" class="flex items-center justify-between pt-1 border-t border-gray-100">
+          <p class="font-dm-sans text-xs text-text-light">
+            {{ filtered.length }} clinic{{ filtered.length === 1 ? '' : 's' }} match your filters
+          </p>
+          <button
+            @click="resetFilters"
+            class="font-dm-sans text-xs text-accent-dark hover:underline"
+          >
+            Clear all
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+
+      <!-- Location error -->
+      <div
+        v-if="locationError"
+        class="mb-5 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 font-dm-sans text-sm text-amber-800 flex items-start gap-2"
+      >
+        <span class="ti ti-alert-triangle mt-0.5 shrink-0"></span>
+        {{ locationError }}
       </div>
 
-      <hr class="my-4" />
-      <h2 class="h5 mb-3">Providers</h2>
-      <p class="text-muted mb-3">
-        {{ filteredProviders.length }} result(s)
-        <span v-if="form.postcode"> • Postcode starts with {{ form.postcode.slice(0, 2) }}</span>
-        <span v-if="form.type"> • Type: {{ typeLabel(form.type) }}</span>
+      <!-- Sorted-by-distance note -->
+      <p v-if="userCoords && !locationError" class="font-dm-sans text-xs text-text-light mb-4 flex items-center gap-1">
+        <span class="ti ti-current-location"></span>
+        Showing clinics closest to your location first
       </p>
 
-      <!-- Map + Table -->
-      <div class="row g-4 align-items-start">
-        <div class="col-lg-6">
-          <ProviderMap :rows="rowsForMap" @select="onMapSelect" />
-        </div>
-        <div class="col-lg-6">
-          <ProviderTable
-            :items="filteredProviders"
-            :get-avg="avgFor"
-            :initial-filters="{ postcodePrefix: form.postcode.slice(0,2), type: form.type }"
-          />
+      <!-- Result count (no active filters) -->
+      <p v-else-if="!hasActiveFilters" class="font-dm-sans text-sm text-text-light mb-5">
+        {{ filtered.length }} clinic{{ filtered.length === 1 ? '' : 's' }} found
+      </p>
+
+      <!-- Cards -->
+      <div v-if="filtered.length > 0" class="flex flex-col gap-4">
+        <div
+          v-for="provider in filtered"
+          :key="provider.id"
+          class="bg-surface rounded-2xl border border-gray-100 p-5 md:p-6 hover:shadow-md transition-shadow"
+        >
+          <!-- Header -->
+          <div class="mb-3">
+            <span :class="['inline-block px-2 py-0.5 rounded-full text-xs font-dm-sans font-medium mb-1.5', typeBadgeClass(provider.type)]">
+              {{ typeLabel(provider.type) }}
+            </span>
+            <h2 class="font-lora text-lg text-dark">{{ provider.name }}</h2>
+            <p class="font-dm-sans text-sm text-text-mid mt-0.5">
+              <span class="ti ti-map-pin text-text-light mr-1"></span>
+              {{ provider.address }}
+              <span v-if="provider._distanceKm !== undefined" class="ml-2 text-text-light">
+                · {{ provider._distanceKm }} km away
+              </span>
+            </p>
+          </div>
+
+          <!-- Info chips -->
+          <div class="flex flex-wrap gap-2 mb-3">
+            <!-- Bulk billing -->
+            <span
+              v-if="provider.bulk_billing === true"
+              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-50 text-green-700 text-xs font-dm-sans font-medium"
+            >
+              <span class="ti ti-circle-check text-sm"></span>Bulk billing
+            </span>
+            <span
+              v-else-if="provider.bulk_billing === false"
+              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 text-text-mid text-xs font-dm-sans"
+            >
+              <span class="ti ti-circle-x text-sm"></span>No bulk billing
+            </span>
+            <span
+              v-else
+              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-dm-sans"
+            >
+              <span class="ti ti-help-circle text-sm"></span>Call to confirm bulk billing
+            </span>
+
+            <!-- Telehealth -->
+            <span
+              v-if="provider.telehealth"
+              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary-light text-primary text-xs font-dm-sans font-medium"
+            >
+              <span class="ti ti-video text-sm"></span>Telehealth
+            </span>
+
+            <!-- Phone -->
+            <a
+              :href="`tel:${provider.phone}`"
+              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-background text-text-mid text-xs font-dm-sans hover:text-primary transition"
+            >
+              <span class="ti ti-phone text-sm"></span>{{ provider.phone }}
+            </a>
+          </div>
+
+          <!-- Languages -->
+          <div v-if="provider.languages?.length" class="flex flex-wrap gap-1.5 mb-5">
+            <span
+              v-for="lang in provider.languages"
+              :key="lang"
+              class="px-2 py-0.5 rounded bg-accent-light text-accent-dark text-xs font-dm-sans"
+            >
+              {{ lang }}
+            </span>
+          </div>
+
+          <!-- Booking CTAs -->
+          <div class="flex flex-wrap gap-2">
+            <a
+              v-if="provider.hotdoc_url"
+              :href="provider.hotdoc_url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-white font-dm-sans text-sm font-medium hover:bg-primary-mid transition"
+            >
+              Book via HotDoc <span class="ti ti-external-link text-sm"></span>
+            </a>
+            <a
+              v-if="provider.healthengine_url"
+              :href="provider.healthengine_url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-primary text-primary font-dm-sans text-sm font-medium hover:bg-primary-light transition"
+            >
+              Book via HealthEngine <span class="ti ti-external-link text-sm"></span>
+            </a>
+          </div>
         </div>
       </div>
-    </section>
+
+      <!-- Empty state -->
+      <div v-else class="text-center py-20 px-4">
+        <div class="w-14 h-14 rounded-full bg-accent-light flex items-center justify-center mx-auto mb-4">
+          <span class="ti ti-stethoscope text-2xl text-accent-dark"></span>
+        </div>
+        <h3 class="font-lora text-xl text-dark mb-2">No clinics found</h3>
+        <p class="font-dm-sans text-sm text-text-mid max-w-sm mx-auto mb-5">
+          Try a different suburb or postcode, or broaden your filters.
+        </p>
+        <button
+          @click="resetFilters"
+          class="px-4 py-2 rounded-lg border border-primary text-primary font-dm-sans text-sm hover:bg-primary-light transition"
+        >
+          Clear all filters
+        </button>
+      </div>
+
+    </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
 import { providers } from '@/data/providers'
-import { getAverage } from '@/services/ratings'
-import ProviderTable from '@/components/ProviderTable.vue'
-import ProviderMap from '@/components/ProviderMap.vue'
 
-const router = useRouter()
+// --- Filter state ---
+const search = ref('')
+const activeTypes = ref([])       // multi-select: array of selected type strings
+const bulkBillingOnly = ref(false)
+const telehealthOnly = ref(false)
+const userCoords = ref(null)      // [lng, lat] from geolocation
+const locating = ref(false)
+const locationError = ref('')
 
-const form = reactive({ name: '', email: '', postcode: '', type: '' })
-const touched = reactive({})
-const invalid = reactive({})
-const saved = ref(false)
+// --- Type filter options ---
+const typeFilters = [
+  { value: 'gp',     label: 'GP',              icon: 'ti-stethoscope' },
+  { value: 'obgyn',  label: "Women's health",  icon: 'ti-heart' },
+  { value: 'mental', label: 'Mental health',   icon: 'ti-brain' },
+  { value: 'physio', label: 'Physio',          icon: 'ti-activity' },
+]
 
-const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
-const isAUPostcode = (v) => /^\d{4}$/.test(v)
-const required = (v) => !!v
-
-function validateField(key) {
-  const v = form[key]
-  if (key === 'name') invalid.name = !required(v)
-  if (key === 'email') invalid.email = !(required(v) && isEmail(v))
-  if (key === 'postcode') invalid.postcode = !(required(v) && isAUPostcode(v))
-  if (key === 'type') invalid.type = !required(v)
-}
-function touch(key) { touched[key] = true; validateField(key) }
-function digitsOnly(key) {
-  form[key] = form[key].replace(/\D+/g, '').slice(0, 4)
-  if (touched[key]) validateField(key)
-}
-function validateAll() {
-  ;['name','email','postcode','type'].forEach(k => { touched[k]=true; validateField(k) })
-  return !Object.values(invalid).some(Boolean)
-}
-
-function onSubmit() {
-  saved.value = false
-  if (!validateAll()) return
-  localStorage.setItem('carePrefs', JSON.stringify(form))
-  saved.value = true
-}
-function resetForm() {
-  Object.assign(form, { name:'', email:'', postcode:'', type:'' })
-  Object.keys(touched).forEach(k=>delete touched[k])
-  Object.keys(invalid).forEach(k=>delete invalid[k])
-  saved.value=false
-}
-
-onMounted(() => {
-  const raw = localStorage.getItem('carePrefs')
-  if (raw) {
-    try { Object.assign(form, JSON.parse(raw)) } catch {}
+// Toggle a type in/out of the activeTypes array
+function toggleType(value) {
+  const idx = activeTypes.value.indexOf(value)
+  if (idx === -1) {
+    activeTypes.value.push(value)
+  } else {
+    activeTypes.value.splice(idx, 1)
   }
-})
-
-const filteredProviders = computed(() => {
-  const pcPrefix = form.postcode?.slice(0, 2)
-  return providers.filter(p => {
-    const byType = form.type ? p.type === form.type : true
-    const byPC = pcPrefix ? p.postcode.startsWith(pcPrefix) : true
-    return byType && byPC
-  })
-})
-
-/** --- Map rows: normalize coords and fallback to postcode centers --- */
-const POSTCODE_CENTER = {
-  '3000': [144.9631, -37.8136], // Melbourne CBD
-  '3002': [144.9842, -37.8125], // East Melbourne
-  '3020': [144.8320, -37.7830], // Sunshine
-  '3024': [144.7008, -37.8098], // Truganina
-  '3053': [144.9660, -37.7980], // Carlton
-  '3072': [145.0160, -37.7390], // Preston
-  '3121': [145.0050, -37.8280], // Richmond
-  '3145': [145.0520, -37.8770], // Malvern East
-  '3150': [145.1650, -37.8780], // Glen Waverley
-  '3186': [144.9930, -37.9030], // Brighton
 }
 
-function ensureCoords(p) {
-  // prefer p.coords: [lng, lat]
-  if (Array.isArray(p.coords) && p.coords.length === 2) {
-    const lng = Number(p.coords[0]); const lat = Number(p.coords[1])
-    if (Number.isFinite(lng) && Number.isFinite(lat)) return [lng, lat]
-  }
-  // support p.lng / p.lat
-  if (Number.isFinite(Number(p.lng)) && Number.isFinite(Number(p.lat))) {
-    return [Number(p.lng), Number(p.lat)]
-  }
-  // fallback to postcode center
-  if (p.postcode && POSTCODE_CENTER[p.postcode]) return POSTCODE_CENTER[p.postcode]
-  return null
-}
-
-const rowsForMap = computed(() =>
-  filteredProviders.value
-    .map(p => {
-      const coords = ensureCoords(p)
-      return coords ? { ...p, coords } : null
-    })
-    .filter(Boolean)
+// True if any filter is active — used to show/hide the summary bar
+const hasActiveFilters = computed(() =>
+  search.value.length > 0 ||
+  activeTypes.value.length > 0 ||
+  bulkBillingOnly.value ||
+  telehealthOnly.value ||
+  userCoords.value !== null
 )
-/** ------------------------------------------------------------------- */
 
-function typeLabel(v) {
-  return { gp:'General Practitioner', obgyn:'OB-GYN', mental:'Mental Health', physio:'Physiotherapy' }[v] || 'Unknown'
+function resetFilters() {
+  search.value = ''
+  activeTypes.value = []
+  bulkBillingOnly.value = false
+  telehealthOnly.value = false
+  userCoords.value = null
+  locationError.value = ''
 }
-function avgFor(id) { return getAverage(id) || 0 }
 
-function onMapSelect(id) {
-  router.push({ name: 'provider-details', params: { id } })
+// --- Geolocation ---
+function useMyLocation() {
+  if (!navigator.geolocation) {
+    locationError.value = 'Your browser doesn\'t support location access.'
+    return
+  }
+  locating.value = true
+  locationError.value = ''
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      // geolocation gives lat/lng; our coords are [lng, lat]
+      userCoords.value = [pos.coords.longitude, pos.coords.latitude]
+      locating.value = false
+      // Clear text search — location takes over
+      search.value = ''
+    },
+    (err) => {
+      locating.value = false
+      locationError.value =
+        err.code === 1
+          ? 'Location access was denied. You can still search by suburb or postcode.'
+          : 'Couldn\'t get your location. Please search manually.'
+    },
+    { timeout: 8000 }
+  )
 }
 
-function goBook(p) {
-  router.push({
-    name: 'appointment',
-    query: {
-      providerId: p.id,
-      doctor: p.name,
-      clinicEmail: p.email || ''
+// --- Haversine distance (km) between two [lng, lat] pairs ---
+function distanceKm([lng1, lat1], [lng2, lat2]) {
+  const R = 6371
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLng = ((lng2 - lng1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+// --- Computed filtered + sorted list ---
+const filtered = computed(() => {
+  const q = search.value.trim().toLowerCase()
+
+  let results = providers.filter((p) => {
+    // Text search: match suburb or postcode
+    if (q.length > 0) {
+      const matchesSuburb = p.suburb.toLowerCase().includes(q)
+      const matchesPostcode = p.postcode.startsWith(q)
+      if (!matchesSuburb && !matchesPostcode) return false
     }
+
+    // Care type — if none selected, show all
+    if (activeTypes.value.length > 0 && !activeTypes.value.includes(p.type)) return false
+
+    // Bulk billing — strict true only
+    if (bulkBillingOnly.value && p.bulk_billing !== true) return false
+
+    // Telehealth
+    if (telehealthOnly.value && !p.telehealth) return false
+
+    return true
   })
+
+  // If user shared location, attach distance and sort by it
+  if (userCoords.value) {
+    results = results
+      .map((p) => ({
+        ...p,
+        _distanceKm: p.coords
+          ? parseFloat(distanceKm(userCoords.value, p.coords).toFixed(1))
+          : null,
+      }))
+      .sort((a, b) => {
+        // Providers without coords go to the end
+        if (a._distanceKm === null) return 1
+        if (b._distanceKm === null) return -1
+        return a._distanceKm - b._distanceKm
+      })
+  }
+
+  return results
+})
+
+// --- Display helpers ---
+function typeLabel(type) {
+  return {
+    gp:     'General Practitioner',
+    obgyn:  "Women's Health",
+    mental: 'Mental Health',
+    physio: 'Physiotherapy',
+  }[type] || type
+}
+
+function typeBadgeClass(type) {
+  return {
+    gp:     'bg-primary-light text-primary',
+    obgyn:  'bg-accent-light text-accent-dark',
+    mental: 'bg-purple-50 text-purple-700',
+    physio: 'bg-green-50 text-green-700',
+  }[type] || 'bg-gray-100 text-text-mid'
 }
 </script>
