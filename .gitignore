@@ -29,5 +29,8 @@ coverage
 
 *.tsbuildinfo
 
+backend/.env
+backend/node_modules
+
 # AI context file — local only
 docs/CONTEXT.md
