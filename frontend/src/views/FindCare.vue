@@ -134,6 +134,20 @@
         {{ filtered.length }} clinic{{ filtered.length === 1 ? '' : 's' }} found
       </p>
 
+      <!-- Loading state -->
+      <div v-if="loading" class="text-center py-20">
+        <span class="ti ti-loader-2 animate-spin text-3xl text-accent-dark"></span>
+        <p class="font-dm-sans text-sm text-text-mid mt-3">Loading clinics…</p>
+      </div>
+
+      <!-- Fetch error -->
+      <div
+        v-else-if="fetchError"
+        class="mb-5 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 font-dm-sans text-sm text-amber-800"
+      >
+        {{ fetchError }}
+      </div>
+
       <!-- Cards -->
       <div v-if="filtered.length > 0" class="flex flex-col gap-4">
         <div
@@ -227,6 +241,7 @@
               Book via HealthEngine <span class="ti ti-external-link text-sm"></span>
             </a>
           </div>
+
         </div>
       </div>
 
@@ -252,27 +267,43 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { providers } from '@/data/providers'
+import { ref, computed, onMounted } from 'vue'
+
+// --- Data ---
+const providers = ref([])
+const loading = ref(true)
+const fetchError = ref('')
+
+onMounted(async () => {
+  try {
+    const res = await fetch('https://withher.onrender.com/api/providers')
+    if (!res.ok) throw new Error('Failed to fetch')
+    providers.value = await res.json()
+  } catch (err) {
+    fetchError.value = 'Couldn\'t load clinics right now. Please try again later.'
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+})
 
 // --- Filter state ---
 const search = ref('')
-const activeTypes = ref([])       // multi-select: array of selected type strings
+const activeTypes = ref([])
 const bulkBillingOnly = ref(false)
 const telehealthOnly = ref(false)
-const userCoords = ref(null)      // [lng, lat] from geolocation
+const userCoords = ref(null)
 const locating = ref(false)
 const locationError = ref('')
 
 // --- Type filter options ---
 const typeFilters = [
-  { value: 'gp',     label: 'GP',              icon: 'ti-stethoscope' },
-  { value: 'obgyn',  label: "Women's health",  icon: 'ti-heart' },
-  { value: 'mental', label: 'Mental health',   icon: 'ti-brain' },
-  { value: 'physio', label: 'Physio',          icon: 'ti-activity' },
+  { value: 'gp',     label: 'GP',             icon: 'ti-stethoscope' },
+  { value: 'obgyn',  label: "Women's health", icon: 'ti-heart' },
+  { value: 'mental', label: 'Mental health',  icon: 'ti-brain' },
+  { value: 'physio', label: 'Physio',         icon: 'ti-activity' },
 ]
 
-// Toggle a type in/out of the activeTypes array
 function toggleType(value) {
   const idx = activeTypes.value.indexOf(value)
   if (idx === -1) {
@@ -282,7 +313,6 @@ function toggleType(value) {
   }
 }
 
-// True if any filter is active — used to show/hide the summary bar
 const hasActiveFilters = computed(() =>
   search.value.length > 0 ||
   activeTypes.value.length > 0 ||
@@ -310,10 +340,8 @@ function useMyLocation() {
   locationError.value = ''
   navigator.geolocation.getCurrentPosition(
     (pos) => {
-      // geolocation gives lat/lng; our coords are [lng, lat]
       userCoords.value = [pos.coords.longitude, pos.coords.latitude]
       locating.value = false
-      // Clear text search — location takes over
       search.value = ''
     },
     (err) => {
@@ -327,7 +355,7 @@ function useMyLocation() {
   )
 }
 
-// --- Haversine distance (km) between two [lng, lat] pairs ---
+// --- Haversine distance ---
 function distanceKm([lng1, lat1], [lng2, lat2]) {
   const R = 6371
   const dLat = ((lat2 - lat1) * Math.PI) / 180
@@ -340,31 +368,22 @@ function distanceKm([lng1, lat1], [lng2, lat2]) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 }
 
-// --- Computed filtered + sorted list ---
+// --- Filtered + sorted list ---
 const filtered = computed(() => {
   const q = search.value.trim().toLowerCase()
 
-  let results = providers.filter((p) => {
-    // Text search: match suburb or postcode
+  let results = providers.value.filter((p) => {
     if (q.length > 0) {
-      const matchesSuburb = p.suburb.toLowerCase().includes(q)
-      const matchesPostcode = p.postcode.startsWith(q)
+      const matchesSuburb = p.suburb?.toLowerCase().includes(q)
+      const matchesPostcode = p.postcode?.startsWith(q)
       if (!matchesSuburb && !matchesPostcode) return false
     }
-
-    // Care type — if none selected, show all
     if (activeTypes.value.length > 0 && !activeTypes.value.includes(p.type)) return false
-
-    // Bulk billing — strict true only
     if (bulkBillingOnly.value && p.bulk_billing !== true) return false
-
-    // Telehealth
     if (telehealthOnly.value && !p.telehealth) return false
-
     return true
   })
 
-  // If user shared location, attach distance and sort by it
   if (userCoords.value) {
     results = results
       .map((p) => ({
@@ -374,7 +393,6 @@ const filtered = computed(() => {
           : null,
       }))
       .sort((a, b) => {
-        // Providers without coords go to the end
         if (a._distanceKm === null) return 1
         if (b._distanceKm === null) return -1
         return a._distanceKm - b._distanceKm
